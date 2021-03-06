@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Lexer {
 	
-	List<Token> listOfTokens=new ArrayList<>();
+	private List<Token> listOfTokens=new ArrayList<>();
 	
 	final List<List<String>> language=Arrays.asList(
 	Arrays.asList("si","Keyword_if"),
@@ -38,7 +38,7 @@ public class Lexer {
 	Arrays.asList("%","Op_mod"),
 	Arrays.asList("!","Op_not"),
 	Arrays.asList("&","Op_and"),
-	Arrays.asList("&","Op_or"),
+	Arrays.asList("|","Op_or"),
 	Arrays.asList("++","Op_increment"),
 	Arrays.asList("--","Op_negativeincrement"),
 	Arrays.asList("<","Op_less"),
@@ -52,6 +52,11 @@ public class Lexer {
 	Arrays.asList("&&","Op_and"),
 	Arrays.asList("||","Op_or")
 	);
+	
+	
+	public List<Token> getListOfTokens(){
+		return this.listOfTokens;
+	}
 	
 	public void printCode() {
 		try {
@@ -206,7 +211,7 @@ public class Lexer {
 							listOfTokens.add(t);
 						}
 						else {
-							Token t=new Token("Float",row,i,token);
+							Token t=new Token("Double",row,i,token);
 							listOfTokens.add(t);
 						}
 					}

@@ -1,6 +1,7 @@
 package client;
 
 import language.jaha.lexer.Lexer;
+import language.jaha.parser.Parser;
 
 public class Client {
 
@@ -8,6 +9,8 @@ public class Client {
 		Lexer lexer=new Lexer();
 		//lexer.printCode();
 		lexer.tokenize();
-		lexer.showTokens();
+		//lexer.showTokens();
+		Parser parser=new Parser(lexer.getListOfTokens());
+		parser.parse();
 	}
 }
