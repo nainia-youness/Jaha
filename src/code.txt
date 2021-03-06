@@ -1,1 +1,1 @@
-pour si;
+a="hello world! \n";

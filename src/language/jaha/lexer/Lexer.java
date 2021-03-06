@@ -48,7 +48,6 @@ public class Lexer {
 	Arrays.asList(")","RightParen"),
 	Arrays.asList("{","LeftBrace"),
 	Arrays.asList("}","RightBrace"),
-	Arrays.asList("\"","Quote"),
 	Arrays.asList("&&","Op_and"),
 	Arrays.asList("||","Op_or")
 	);
@@ -162,9 +161,6 @@ public class Lexer {
 	    if(patternInlineComFound) {
 	      line = line.substring(0, InlineComMatcher.end()-2);
 	    } 
-	    //
-	
-		
 		String token="";
 		boolean isContinue;
 		for(int i=0;i<line.length();i++) {
@@ -173,7 +169,7 @@ public class Lexer {
 			List<Object> specialCharList=Arrays.asList(containSpecialChar(line.substring(i,i+1)));
 			String specialChar;
 			if((boolean) specialCharList.get(0)) {//is line[i] special char
-					if(i<line.length()-1 && (boolean) containSpecialChar(line.substring(i,i+2))[0])//is line[i]+line[i+1] a spetial char
+					if(i<line.length()-1 && (boolean) containSpecialChar(line.substring(i,i+2))[0])//is line[i]+line[i+1] a special char
 					{
 						specialCharList=Arrays.asList(containSpecialChar(line.substring(i,i+2)));
 						specialChar=line.substring(i,i+2);
@@ -182,10 +178,10 @@ public class Lexer {
 					else {
 						specialChar=line.substring(i,i+1);
 					}
-					if((boolean) containSpecialChar(token)[0]) {//is all the token a special catacter
+					if((boolean) containSpecialChar(token)[0]) {//is all the token a special character
 						specialCharList=Arrays.asList(containSpecialChar(token));
 						specialChar=token;
-						System.out.println("spacial char: "+specialChar+" type: "+specialCharList.get(1));
+						System.out.println("spacial char continue: "+specialChar+" type: "+specialCharList.get(1));
 						token="";
 						continue;
 					}
@@ -205,7 +201,7 @@ public class Lexer {
 							System.out.println("float: "+token);
 						}
 					}
-					else {//vars and string
+					else {//vars
 						System.out.println("Identifier: "+token+" type: Identifier");
 					}
 				}
@@ -213,6 +209,19 @@ public class Lexer {
 				token="";
 				if(isContinue) {
 					i++;
+				}
+			}
+			else {//for the strings
+				if(line.substring(i,i+1).equals("\"")) {
+				    Pattern stringPattern= Pattern.compile("\".*\"", Pattern.CASE_INSENSITIVE);
+				    Matcher stringMatcher = stringPattern.matcher(line);
+				    boolean stringPatternFound = stringMatcher.find();
+				    if(stringPatternFound) {
+				    	System.out.println("string:  "+line.substring(stringMatcher.start(),stringMatcher.end()));
+				    	line = line.substring(0,stringMatcher.start())+line.substring(stringMatcher.end(),line.length());
+				    	token = token.substring(0, token.length() - 1);
+				    	i--;
+				    } 
 				}
 			}
 		}
