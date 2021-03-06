@@ -8,5 +8,6 @@ public class Client {
 		Lexer lexer=new Lexer();
 		//lexer.printCode();
 		lexer.tokenize();
+		lexer.showTokens();
 	}
 }

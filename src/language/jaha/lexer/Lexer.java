@@ -2,6 +2,7 @@ package language.jaha.lexer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class Lexer {
 	
-	List<Token> listOfTokens;
+	List<Token> listOfTokens=new ArrayList<>();
 	
 	final List<List<String>> language=Arrays.asList(
 	Arrays.asList("si","Keyword_if"),
@@ -72,9 +73,11 @@ public class Lexer {
 		try {
 			File myObj = new File("src/code.txt");
 		    Scanner myReader = new Scanner(myObj);
+		    int row=1;
 		    while (myReader.hasNextLine()) {
 		       String data = myReader.nextLine();
-		       tokenizeLine(data);
+		       tokenizeLine(data,row);
+		       row++;
 		    }
 		    myReader.close();
 		}
@@ -153,7 +156,7 @@ public class Lexer {
 		return true;
 	}
 	
-	public void tokenizeLine(String line) {
+	public void tokenizeLine(String line,int row) {
 		//remove comments
 	    Pattern patternInlineCom = Pattern.compile("//", Pattern.CASE_INSENSITIVE);
 	    Matcher InlineComMatcher = patternInlineCom.matcher(line);
@@ -181,7 +184,8 @@ public class Lexer {
 					if((boolean) containSpecialChar(token)[0]) {//is all the token a special character
 						specialCharList=Arrays.asList(containSpecialChar(token));
 						specialChar=token;
-						System.out.println("spacial char continue: "+specialChar+" type: "+specialCharList.get(1));
+						Token t=new Token((String)specialCharList.get(1),row,i,specialChar);
+						listOfTokens.add(t);
 						token="";
 						continue;
 					}
@@ -190,22 +194,27 @@ public class Lexer {
 					}
 				if((boolean) isInLanguage(token)[0]) {
 					List<Object> keyWord=Arrays.asList(isInLanguage(token));
-					System.out.println("key word: "+token+ " type: "+keyWord.get(1));
+					Token t=new Token((String)keyWord.get(1),row,i,token);
+					listOfTokens.add(t);
 				}
 				else {
 					if(isTokenNumber(token)) {//numbers
 						if(isInt(token)) {
-							System.out.println("int: "+token);
+							Token t=new Token("Integer",row,i,token);
+							listOfTokens.add(t);
 						}
 						else {
-							System.out.println("float: "+token);
+							Token t=new Token("Float",row,i,token);
+							listOfTokens.add(t);
 						}
 					}
 					else {//vars
-						System.out.println("Identifier: "+token+" type: Identifier");
+						Token t=new Token("Identifier",row,i,token);
+						listOfTokens.add(t);
 					}
 				}
-				System.out.println("spacial char: "+specialChar+" type: "+specialCharList.get(1));
+				Token t=new Token((String)specialCharList.get(1),row,i+1,specialChar);
+				listOfTokens.add(t);
 				token="";
 				if(isContinue) {
 					i++;
@@ -217,13 +226,21 @@ public class Lexer {
 				    Matcher stringMatcher = stringPattern.matcher(line);
 				    boolean stringPatternFound = stringMatcher.find();
 				    if(stringPatternFound) {
-				    	System.out.println("string:  "+line.substring(stringMatcher.start(),stringMatcher.end()));
+						Token t=new Token("String",row,i+1,line.substring(stringMatcher.start(),stringMatcher.end()));
+						listOfTokens.add(t);
 				    	line = line.substring(0,stringMatcher.start())+line.substring(stringMatcher.end(),line.length());
 				    	token = token.substring(0, token.length() - 1);
 				    	i--;
 				    } 
 				}
 			}
+		}
+	}
+	
+	
+	public void showTokens() {
+		for (int i = 0; i < this.listOfTokens.size(); i++) {
+			this.listOfTokens.get(i).showToken();
 		}
 	}
 }

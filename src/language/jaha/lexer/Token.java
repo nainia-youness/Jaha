@@ -2,26 +2,22 @@ package language.jaha.lexer;
 
 public class Token {
 	
-	private int id;
 	private String type;
 	private int line;
 	private int column;
 	private String symbol;
 	
-	public Token(int id, String type, int line, int column, String symbol) {
-		this.id = id;
+	public Token(String type, int line, int column, String symbol) {
 		this.type = type;
 		this.line = line;
 		this.column = column;
 		this.symbol = symbol;
 	}
 	
-	public int getId() {
-		return id;
+	public void showToken() {
+		System.out.println("type: "+this.type+ " line: "+this.line+" column: "+this.column+" symbol: "+this.symbol);
 	}
-	public void setId(int id) {
-		this.id = id;
-	}
+	
 	public String getType() {
 		return type;
 	}

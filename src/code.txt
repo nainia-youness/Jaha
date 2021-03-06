@@ -1,1 +1,1 @@
-a="hello world! \n";
+a="hi";
