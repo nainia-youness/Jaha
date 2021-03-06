@@ -184,8 +184,10 @@ public class Lexer {
 					if((boolean) containSpecialChar(token)[0]) {//is all the token a special character
 						specialCharList=Arrays.asList(containSpecialChar(token));
 						specialChar=token;
-						Token t=new Token((String)specialCharList.get(1),row,i,specialChar);
-						listOfTokens.add(t);
+						if(!specialCharList.get(1).equals("Tab") && !specialCharList.get(1).equals("Space")) {
+							Token t=new Token((String)specialCharList.get(1),row,i,specialChar);
+							listOfTokens.add(t);	
+						}
 						token="";
 						continue;
 					}
@@ -213,8 +215,11 @@ public class Lexer {
 						listOfTokens.add(t);
 					}
 				}
-				Token t=new Token((String)specialCharList.get(1),row,i+1,specialChar);
-				listOfTokens.add(t);
+				if(!specialCharList.get(1).equals("Tab") && !specialCharList.get(1).equals("Space"))
+				{
+					Token t=new Token((String)specialCharList.get(1),row,i+1,specialChar);
+					listOfTokens.add(t);
+				}
 				token="";
 				if(isContinue) {
 					i++;
