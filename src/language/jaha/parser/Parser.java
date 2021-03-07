@@ -93,8 +93,8 @@ public class Parser {
 	
 	public List<List<Object>> sortListByPriority(){
 		int j=0;
-		while(j!=lineBinaryOperators.size()) {
-			int max=(Integer)lineBinaryOperators.get(0).get(2);
+		while(j<lineBinaryOperators.size()) {
+			int max=(Integer)lineBinaryOperators.get(j).get(2);
 			int maxi=j;
 			for(int i=j;i<lineBinaryOperators.size();i++) {
 				if(max<(Integer)lineBinaryOperators.get(i).get(2)) {
@@ -102,7 +102,7 @@ public class Parser {
 					maxi=i;
 				}
 			}
-			Collections.swap(lineBinaryOperators, 0, maxi);
+			Collections.swap(lineBinaryOperators, j, maxi);
 			j++;
 		}
 		return lineBinaryOperators;
@@ -119,22 +119,20 @@ public class Parser {
 				addedPriority+=30;
 			}
 			else if(token.getType().equals("RightParen")) {
-				addedPriority=0;
+				addedPriority-=30;
 			}
 			if(isBinaryOperation(i)) {
 				int priority=getPriorityOfBinaryOp(token.getSymbol());
 				priority+=addedPriority;
 				List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
 				lineBinaryOperators.add(bo);
-				//BinaryOperator binaryOp=createBinaryOperator(i);
-				token.showToken();
+				//token.showToken();
 			}
 		}
 		else {//you have reached the semicolon
 			//sort the list
-			//List<List<Object>> sortedList=sortListByPriority();
-			//System.out.println(sortedList);
-			System.out.println(lineBinaryOperators);
+			List<List<Object>> sortedList=sortListByPriority();
+			System.out.println(sortedList);
 		}
 	}
 	
