@@ -215,9 +215,21 @@ public class Lexer {
 							listOfTokens.add(t);
 						}
 					}
-					else {//vars
-						Token t=new Token("Identifier",row,i,token);
-						listOfTokens.add(t);
+					else {//Idenfiers and boolean
+						if(token.equals("true"))
+						{
+							Token t=new Token("Boolean",row,i,"true");
+							listOfTokens.add(t);
+						}
+						if(token.equals("false"))
+						{
+							Token t=new Token("Boolean",row,i,"false");
+							listOfTokens.add(t);
+						}
+						else {
+							Token t=new Token("Identifier",row,i,token);
+							listOfTokens.add(t);
+						}
 					}
 				}
 				if(!specialCharList.get(1).equals("Tab") && !specialCharList.get(1).equals("Space"))

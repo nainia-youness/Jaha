@@ -16,6 +16,7 @@ public class Parser {
 
 	
 	Node parsingTree;
+	List<Node> listOfParsingTrees=Arrays.asList();
 	List<Token> listOfTokens=Arrays.asList();
 	
 	public Parser(List<Token> listOfTokens) {
@@ -48,41 +49,7 @@ public class Parser {
 			Arrays.asList("||","Op_or","3")
 	);
 	
-	
-	public boolean isBinaryOperation(int j) {
-		if(j==0)
-			return false;
-		if(this.listOfTokens.get(j).getSymbol().equals("-"))
-		{
-			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
-				return true;
-			else
-			{
-				System.out.println("ERROR");
-				return false;
-			}
-		}
-		for(int i=0;i<binaryOperators.size();i++) {
-			if(this.listOfTokens.get(j).getSymbol().equals(binaryOperators.get(i).get(0)))
-				return true;
-		}
-		return false;
-	}
-	
-
-	
-	/*BinaryOperator createBinaryOperator(int i) {
-		Object leftValue;
-		if(this.listOfTokens.get(i).getType().equals("Integer"))
-			leftValue=(Integer)Integer.parseInt(this.listOfTokens.get(i).getSymbol());
-		else if(this.listOfTokens.get(i).getType().equals("Double"))
-			leftValue=(Double)Double.parseDouble(this.listOfTokens.get(i).getSymbol());
-		else if(this.listOfTokens.get(i).getType().equals("String"))
-			leftValue=(Double)Double.parseDouble(this.listOfTokens.get(i).getSymbol());
-		BinaryOperator myBo=new BinaryOperator(this.listOfTokens.get(i).getType(),this.listOfTokens.get(i).getSymbol(),this.listOfTokens.get(i-1).getSymbol(),this.listOfTokens.get(i+1).getSymbol());
-		return myBo;
-	}*/
-	
+		
 	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
 	
 	public int getPriorityOfBinaryOp(String operator) {
@@ -124,14 +91,39 @@ public class Parser {
 		else if(token.getType().equals("Double")) {
 			go= new Variable(token.getType(),Double.parseDouble(token.getSymbol()));
 		}
+		else if(token.getType().equals("String")) {
+			go= new Variable(token.getType(),token.getSymbol());
+		}
 		else{//it s an identifier
 			go= new Identifier(token.getType(),token.getSymbol());
 		}
 		return go;
 	}
 	
+	public boolean isBinaryOperation(int j) {
+		if(j==0)
+			return false;
+		if(this.listOfTokens.get(j).getSymbol().equals("-"))
+		{
+			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
+				return true;
+			else
+			{
+				return false;
+			}
+		}
+		for(int i=0;i<binaryOperators.size();i++) {
+			if(this.listOfTokens.get(j).getSymbol().equals(binaryOperators.get(i).get(0)))
+				return true;
+		}
+		return false;
+	}
 	
-	public void parseExpression(int i,ErrorHandler errorHandler) {
+	public void initializeParsingTree() {
+		//parsingTree=new Node();
+	}
+	
+	public void parseExpression(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(!token.getType().equals("Semicolon")) {
 			if(token.getType().equals("LeftParen"))
@@ -140,6 +132,7 @@ public class Parser {
 				addedPriority+=30;
 			}
 			else if(token.getType().equals("RightParen")) {
+				errorHandler.isLeftParenthesExist(i);
 				addedPriority-=30;
 			}
 			if(isBinaryOperation(i)) {
@@ -155,7 +148,8 @@ public class Parser {
 			System.out.println(sortedList);
 			//we create the first leaf node
 			int firstOperatorItem=(Integer)sortedList.get(0).get(1);
-			String type1 = listOfTokens.get(firstOperatorItem).getType();
+			//String type1 = listOfTokens.get(firstOperatorItem).getType();
+			String type1 = listOfTokens.get(firstOperatorItem+1).getType();
 			String operator1=listOfTokens.get(firstOperatorItem).getSymbol();
 			Node leftNode1=createGeneralObjectNode(firstOperatorItem-1);
 			Node rightNode1=createGeneralObjectNode(firstOperatorItem+1);
@@ -170,10 +164,10 @@ public class Parser {
 				for(int j=1;j<sortedList.size();j++) {
 					int OperatorItemj=(Integer)sortedList.get(j).get(1);
 					System.out.println(OperatorItemj);
-					String typej = listOfTokens.get(OperatorItemj).getType();
+					String typej = listOfTokens.get(OperatorItemj+1).getType();
 					String operatorj=listOfTokens.get(OperatorItemj).getSymbol();
 					if(prevOperatorItem>OperatorItemj)
-						leftNodej=createGeneralObjectNode(OperatorItemj-1);//not working
+						leftNodej=createGeneralObjectNode(OperatorItemj-1);
 					else
 						leftNodej=createGeneralObjectNode(OperatorItemj+1);
 					rightNodej=node1;
@@ -188,10 +182,13 @@ public class Parser {
 				parsingTree=node1;
 			}
 			System.out.println(parsingTree.diplayTree());
+			System.out.println(parsingTree.eval());
+			listOfParsingTrees.add(parsingTree);
+			//have to initialize the parsingTree
 		}
 	}
 	
-	public void parse() {
+	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
 			Token token=listOfTokens.get(i);

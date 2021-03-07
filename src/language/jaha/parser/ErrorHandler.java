@@ -14,6 +14,7 @@ public class ErrorHandler {
 		this.listOfTokens=listOfTokens;
 	}
 	
+	
 	public boolean isTokenGeneralObject(Node node,boolean isRightNode) {
 		boolean isTokenGeneralObject= node.getType().equals("Integer") || node.getType().equals("Double") || node.getType().equals("Identifier");
 		if(isRightNode) {
@@ -26,12 +27,18 @@ public class ErrorHandler {
 	}
 	
 	public boolean isBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
-		if(leftNode.getType().equals("Integer") && rightNode.getType().equals("String"))
-			return false;
-		else if(leftNode.getType().equals("String") && rightNode.getType().equals("Integer"))
-			return false;
-		return true;
+		if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Integer"))
+			return true;
+		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Double"))
+			return true;
+		else if(leftNode.getType().equals("String") && rightNode.getType().equals("String"))
+			return true;
+		else if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Boolean"))
+			return true;
+		return false;
+		//nodes can be binary operations
 	}
+	
 	
 	public boolean isIdentifierInitialized(Node node) {
 		if(node.getType().equals("Identifier")){
@@ -40,35 +47,76 @@ public class ErrorHandler {
 		return true;
 	}
 	
-	public void BinaryOperatorErrorCheck(BinaryOperator bo) {
+	public void BinaryOperatorErrorCheck(BinaryOperator bo) throws Exception {
 		Node leftNode=(Node)  bo.getLeftNode();
 		Node rightNode=(Node) bo.getRightNode();
-		if(bo.getOperator().equals("+") || bo.getOperator().equals("-") || bo.getOperator().equals("*"))
-			{
-				if(!isTokenGeneralObject(rightNode,true)) {
-					System.out.println("ERROR: Next token not variable or parameter");
-				}
-				if(!isTokenGeneralObject(leftNode,false)) {
-					System.out.println("ERROR: Previous token not variable or parameter");
-				}
-				else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
-					System.out.println("ERROR: Binary operation parameters not allowed");
-				}
-				else if(!isIdentifierInitialized(leftNode)) {//should be defined
-					System.out.println("ERROR: Variable not initialized");
-				}
-			}
 		if(bo.getOperator().equals("=")) {
-			if(isTokenGeneralObject(rightNode,false)) {
-				System.out.println("ERROR: Next token not variable or parameter");
+			if(!isTokenGeneralObject(rightNode,true)) {
+				throw new Exception("ERROR: Next token not variable or parameter");
 			}
 			else if(!leftNode.getType().equals("Identifier")) {
-				System.out.println("ERROR: You cannot assign to a different type than an Identifier");
+				throw new Exception("ERROR: You cannot assign to a different type than an Identifier");
 			}
 		}
+		else if(bo.getOperator().equals("==") || bo.getOperator().equals("!=") || bo.getOperator().equals(">") || bo.getOperator().equals("<") || bo.getOperator().equals(">=") || bo.getOperator().equals("<=")) {
+			if(!isTokenGeneralObject(rightNode,true))
+				throw new Exception("ERROR: Next token not variable or parameter");
+			if(!isTokenGeneralObject(leftNode,false)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
+				throw new Exception("ERROR: Binary operation parameters not allowed");
+			}
+			else if(!isIdentifierInitialized(leftNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+			else if(!isIdentifierInitialized(rightNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+		}
+		else if(bo.getOperator().equals("&&") ||  bo.getOperator().equals("||")) {
+			if(!leftNode.getType().equals("Boolean") || !leftNode.getType().equals("LeftParen")) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			else if(!rightNode.getType().equals("Boolean") || !leftNode.getType().equals("RightParen")) {
+				throw new Exception("ERROR: Next token not variable or parameter");
+			}
+			else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
+				throw new Exception("ERROR: Binary operation parameters not allowed");
+			}
+			else if(!isIdentifierInitialized(leftNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+			else if(!isIdentifierInitialized(rightNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+		}
+		else
+			{
+				if(!isTokenGeneralObject(rightNode,true)) {
+					throw new Exception("ERROR: Next token not variable or parameter");
+				}
+				if(!isTokenGeneralObject(leftNode,false)) {
+					throw new Exception("ERROR: Previous token not variable or parameter");
+				}
+				else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
+					throw new Exception("ERROR: Binary operation parameters not allowed");
+				}
+				else if(!isIdentifierInitialized(leftNode)) {//should be defined
+					throw new Exception("ERROR: Variable not initialized");
+				}
+				else if(!isIdentifierInitialized(rightNode)) {//should be defined
+					throw new Exception("ERROR: Variable not initialized");
+				}
+			}
+
 	}
 	
-	public void isRightParenthesExist(int i){
+	public void isRightParenthesExist(int i) throws Exception{
+		if(listOfTokens.get(i+1).getType().equals("Semicolon"))
+			throw new Exception("ERROR: Wrong useage of Parenthesis!");
+		if(listOfTokens.get(i+1).getType().equals("RightParen"))
+			throw new Exception("ERROR: Two Parenthesis can t be empty!");
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j<listOfTokens.size();j++) {
@@ -80,13 +128,17 @@ public class ErrorHandler {
 			}
 		}
 		if(nbrLeftParenthes!=nbrRightParenthes)
-			System.out.println("ERROR: Right Parenthesis is missing");
+			throw new Exception("ERROR: Right Parenthesis is missing");
 	}
 	
-	public void isLeftParenthesExist(int i){
+	public void isLeftParenthesExist(int i) throws Exception{
+		if(i==0)
+			throw new Exception("ERROR: Wrong useage of Parenthesis!");
+		if(listOfTokens.get(i-1).getType().equals("LeftParen"))
+			throw new Exception("ERROR: Two Parenthesis can t be empty!");
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
-		for(int j=i;j<listOfTokens.size();j++) {
+		for(int j=i;j>=0;j--) {
 			if(listOfTokens.get(j).getType().equals("LeftParen")) {
 				nbrLeftParenthes++;
 			}
@@ -95,7 +147,9 @@ public class ErrorHandler {
 			}
 		}
 		if(nbrLeftParenthes!=nbrRightParenthes)
-			System.out.println("ERROR: Right Parenthesis is missing");
+			throw new Exception("ERROR: Left Parenthesis is missing");
 	}
 	
+	
+
 }

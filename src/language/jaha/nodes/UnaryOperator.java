@@ -20,8 +20,7 @@ public class UnaryOperator implements Node{
 		return null;
 		/*switch(operator) {
 			case "!":
-				if(value.getClass().getName()=="java.lang.Boolean")
-					return !(boolean)value;
+				return !(boolean)value.eval();
 				else
 					return null;
 			case "-":
@@ -36,6 +35,7 @@ public class UnaryOperator implements Node{
 				return null;
 		}*/
 	}
+	
 	public Object getValue() {
 		return value;
 	}
