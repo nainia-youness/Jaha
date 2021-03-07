@@ -1,6 +1,8 @@
 package language.jaha.parser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import language.jaha.lexer.Token;
@@ -77,7 +79,7 @@ public class Parser {
 		return myBo;
 	}*/
 	
-	List<List<Object>> lineBinaryOperators=Arrays.asList();
+	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
 	
 	public int getPriorityOfBinaryOp(String operator) {
 		for(int i=0;i<binaryOperators.size();i++) {
@@ -89,24 +91,50 @@ public class Parser {
 	}
 	
 	
-	public List<Object> SortList(){
-		return null;
+	public List<List<Object>> sortListByPriority(){
+		int j=0;
+		while(j!=lineBinaryOperators.size()) {
+			int max=(Integer)lineBinaryOperators.get(0).get(2);
+			int maxi=j;
+			for(int i=j;i<lineBinaryOperators.size();i++) {
+				if(max<(Integer)lineBinaryOperators.get(i).get(2)) {
+					max=(Integer)lineBinaryOperators.get(i).get(2);
+					maxi=i;
+				}
+			}
+			Collections.swap(lineBinaryOperators, 0, maxi);
+			j++;
+		}
+		return lineBinaryOperators;
 	}
 	
+	int addedPriority=0;
 	
 	public void parseExpression(int i,ErrorHandler errorHandler) {
 		Token token=listOfTokens.get(i);
 		if(!token.getType().equals("Semicolon")) {
+			if(token.getType().equals("LeftParen"))
+			{
+				//call the error handler to see if the right one is in the right place
+				addedPriority+=30;
+			}
+			else if(token.getType().equals("RightParen")) {
+				addedPriority=0;
+			}
 			if(isBinaryOperation(i)) {
 				int priority=getPriorityOfBinaryOp(token.getSymbol());
-				List<Object> bo=Arrays.asList(token.getSymbol(),i,priority);
+				priority+=addedPriority;
+				List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
 				lineBinaryOperators.add(bo);
 				//BinaryOperator binaryOp=createBinaryOperator(i);
 				token.showToken();
 			}
 		}
 		else {//you have reached the semicolon
-			
+			//sort the list
+			//List<List<Object>> sortedList=sortListByPriority();
+			//System.out.println(sortedList);
+			System.out.println(lineBinaryOperators);
 		}
 	}
 	
@@ -117,6 +145,7 @@ public class Parser {
 			Token token=listOfTokens.get(i);
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler);
+			
 		}
 	}
 }
