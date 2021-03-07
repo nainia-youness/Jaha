@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import language.jaha.lexer.Token;
+import language.jaha.nodes.BinaryOperator;
 
 public class Parser {
 
@@ -47,10 +48,13 @@ public class Parser {
 			return false;
 		if(this.listOfTokens.get(j).getSymbol().equals("-"))
 		{
-			if(this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
+			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
 				return true;
 			else
+			{
+				System.out.println("ERROR");
 				return false;
+			}
 		}
 		for(int i=0;i<binaryOperators.size();i++) {
 			if(this.listOfTokens.get(j).getSymbol().equals(binaryOperators.get(i).get(0)))
@@ -59,16 +63,39 @@ public class Parser {
 		return false;
 	}
 	
+
 	
-	public void parse() {
-		for(int i=0;i<this.listOfTokens.size();i++) {
-			Token token=listOfTokens.get(i);
+	/*BinaryOperator createBinaryOperator(int i) {
+		Object leftValue;
+		if(this.listOfTokens.get(i).getType().equals("Integer"))
+			leftValue=(Integer)Integer.parseInt(this.listOfTokens.get(i).getSymbol());
+		else if(this.listOfTokens.get(i).getType().equals("Double"))
+			leftValue=(Double)Double.parseDouble(this.listOfTokens.get(i).getSymbol());
+		else if(this.listOfTokens.get(i).getType().equals("String"))
+			leftValue=(Double)Double.parseDouble(this.listOfTokens.get(i).getSymbol());
+		BinaryOperator myBo=new BinaryOperator(this.listOfTokens.get(i).getType(),this.listOfTokens.get(i).getSymbol(),this.listOfTokens.get(i-1).getSymbol(),this.listOfTokens.get(i+1).getSymbol());
+		return myBo;
+	}*/
+	
+	List<List<String>> lineBinaryOperators=Arrays.asList();
+	
+	public void parseExpression(int i,ErrorHandler errorHandler) {
+		Token token=listOfTokens.get(i);
+		if(!token.getType().equals("Semicolon")) {
 			if(isBinaryOperation(i)) {
-				boolean isNextTokenVar=this.listOfTokens.get(i+1).getType().equals("Integer") || this.listOfTokens.get(i+1).getType().equals("Double") || this.listOfTokens.get(i+1).getType().equals("Identifier");
-				if(!isNextTokenVar)
-					System.out.println("ERROR= wrong operation usage");
+				//BinaryOperator binaryOp=createBinaryOperator(i);
 				token.showToken();
 			}
+		}
+	}
+	
+	public void parse() {
+		ErrorHandler errorHandler=new ErrorHandler();
+		
+		for(int i=0;i<this.listOfTokens.size();i++) {
+			Token token=listOfTokens.get(i);
+			//if no key word in the line , only expressions
+			parseExpression(i,errorHandler);
 		}
 	}
 }

@@ -1,13 +1,12 @@
-package language.java.nodes;
+package language.jaha.nodes;
 
+public class UnaryOperator implements Node{
 
-
-public class UnaryOperator {
-	private Object value;
+	private Node value;
 	private String type;
 	private String operator;
 	
-	public UnaryOperator(Object value, String type, String operator) {
+	public UnaryOperator(Node value, String type, String operator) {
 		this.value = value;
 		this.type = type;
 		this.operator = operator;
@@ -15,8 +14,9 @@ public class UnaryOperator {
 
 	
 	
-	/*Object evaluate(Object value) {
-		switch(operator) {
+	public Object eval() {
+		return null;
+		/*switch(operator) {
 			case "!":
 				if(value.getClass().getName()=="java.lang.Boolean")
 					return !(boolean)value;
@@ -32,48 +32,41 @@ public class UnaryOperator {
 					return null;
 			default:
 				return null;
-		}
+		}*/
 	}
-	*/
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	public Object getValue() {
 		return value;
 	}
 
-	public void setValue(Object value) {
+
+
+	public void setValue(Node value) {
 		this.value = value;
 	}
+
+
 
 	public String getType() {
 		return type;
 	}
 
+
+
 	public void setType(String type) {
 		this.type = type;
 	}
+
+
 
 	public String getOperator() {
 		return operator;
 	}
 
+
+
 	public void setOperator(String operator) {
 		this.operator = operator;
 	}
-	
-	
+
+
 }

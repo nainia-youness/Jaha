@@ -40,7 +40,7 @@ public class Lexer {
 	Arrays.asList("&","Op_and"),
 	Arrays.asList("|","Op_or"),
 	Arrays.asList("++","Op_increment"),
-	Arrays.asList("--","Op_negativeincrement"),
+	Arrays.asList("--","Op_decrement"),
 	Arrays.asList("<","Op_less"),
 	Arrays.asList(">","Op_greater"),
 	Arrays.asList("<=","Op_lessequal"),
