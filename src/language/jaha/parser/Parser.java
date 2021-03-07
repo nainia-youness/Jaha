@@ -17,29 +17,29 @@ public class Parser {
 	}
 	
 	final List<List<String>> unaryOperators=Arrays.asList(
-	Arrays.asList("!","Op_not"),
-	Arrays.asList("&","Op_and"),
-	Arrays.asList("|","Op_or"),
-	Arrays.asList("++","Op_increment"),
-	Arrays.asList("--","Op_negativeincrement"),
-	Arrays.asList("-","Op_subtract")
+	Arrays.asList("!","Op_not","13"),
+	Arrays.asList("&","Op_and","7"),
+	Arrays.asList("|","Op_or","5"),
+	Arrays.asList("++","Op_increment","14"),
+	Arrays.asList("--","Op_negativeincrement","14"),
+	Arrays.asList("-","Op_subtract","13")
 	);
 	
-	final List<List<String>> binaryOperators=Arrays.asList(
-			Arrays.asList("=","Op_assign"),
-			Arrays.asList("==","Op_equal"),
-			Arrays.asList("!=","Op_notequal"),
-			Arrays.asList("+","Op_add"),
-			Arrays.asList("-","Op_subtract"),
-			Arrays.asList("*","Op_multiply"),
-			Arrays.asList("/","Op_divide"),
-			Arrays.asList("%","Op_mod"),
-			Arrays.asList("<","Op_less"),
-			Arrays.asList(">","Op_greater"),
-			Arrays.asList("<=","Op_lessequal"),
-			Arrays.asList(">=","Op_greaterequal"),
-			Arrays.asList("&&","Op_and"),
-			Arrays.asList("||","Op_or")
+	final List<List<String>> binaryOperators=Arrays.asList(//priorite max 14 , pour les ( 15
+			Arrays.asList("=","Op_assign","1"),
+			Arrays.asList("==","Op_equal","8"),
+			Arrays.asList("!=","Op_notequal","8"),
+			Arrays.asList("+","Op_add","11"),
+			Arrays.asList("-","Op_subtract","11"),
+			Arrays.asList("*","Op_multiply","12"),
+			Arrays.asList("/","Op_divide","12"),
+			Arrays.asList("%","Op_mod","12"),
+			Arrays.asList("<","Op_less","9"),
+			Arrays.asList(">","Op_greater","9"),
+			Arrays.asList("<=","Op_lessequal","9"),
+			Arrays.asList(">=","Op_greaterequal","9"),
+			Arrays.asList("&&","Op_and","4"),
+			Arrays.asList("||","Op_or","3")
 	);
 	
 	
@@ -77,15 +77,36 @@ public class Parser {
 		return myBo;
 	}*/
 	
-	List<List<String>> lineBinaryOperators=Arrays.asList();
+	List<List<Object>> lineBinaryOperators=Arrays.asList();
+	
+	public int getPriorityOfBinaryOp(String operator) {
+		for(int i=0;i<binaryOperators.size();i++) {
+			if(operator.equals(binaryOperators.get(i).get(0))) {
+				return Integer.parseInt(binaryOperators.get(i).get(2));
+			}
+		}
+		return 0;//error
+	}
+	
+	
+	public List<Object> SortList(){
+		return null;
+	}
+	
 	
 	public void parseExpression(int i,ErrorHandler errorHandler) {
 		Token token=listOfTokens.get(i);
 		if(!token.getType().equals("Semicolon")) {
 			if(isBinaryOperation(i)) {
+				int priority=getPriorityOfBinaryOp(token.getSymbol());
+				List<Object> bo=Arrays.asList(token.getSymbol(),i,priority);
+				lineBinaryOperators.add(bo);
 				//BinaryOperator binaryOp=createBinaryOperator(i);
 				token.showToken();
 			}
+		}
+		else {//you have reached the semicolon
+			
 		}
 	}
 	
