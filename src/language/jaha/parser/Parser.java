@@ -7,11 +7,15 @@ import java.util.List;
 
 import language.jaha.lexer.Token;
 import language.jaha.nodes.BinaryOperator;
+import language.jaha.nodes.GeneralObject;
+import language.jaha.nodes.Identifier;
+import language.jaha.nodes.Node;
+import language.jaha.nodes.Variable;
 
 public class Parser {
 
 	
-	List<Object> parsingTree=Arrays.asList();
+	Node parsingTree;
 	List<Token> listOfTokens=Arrays.asList();
 	
 	public Parser(List<Token> listOfTokens) {
@@ -110,6 +114,23 @@ public class Parser {
 	
 	int addedPriority=0;
 	
+	
+	public Node createGeneralObjectNode(int i) {
+		Token token=listOfTokens.get(i); 
+		GeneralObject go;
+		if(token.getType().equals("Integer")) {
+			go= new Variable(token.getType(),Integer.parseInt(token.getSymbol()));
+		}
+		else if(token.getType().equals("Double")) {
+			go= new Variable(token.getType(),Double.parseDouble(token.getSymbol()));
+		}
+		else{//it s an identifier
+			go= new Identifier(token.getType(),token.getSymbol());
+		}
+		return go;
+	}
+	
+	
 	public void parseExpression(int i,ErrorHandler errorHandler) {
 		Token token=listOfTokens.get(i);
 		if(!token.getType().equals("Semicolon")) {
@@ -130,9 +151,32 @@ public class Parser {
 			}
 		}
 		else {//you have reached the semicolon
-			//sort the list
 			List<List<Object>> sortedList=sortListByPriority();
 			System.out.println(sortedList);
+			//we create the first leaf node
+			int firstOperatorItem=(Integer)sortedList.get(0).get(1);
+			String type1 = listOfTokens.get(firstOperatorItem).getType();
+			String operator1=listOfTokens.get(firstOperatorItem).getSymbol();
+			Node leftNode1=createGeneralObjectNode(firstOperatorItem-1);
+			Node rightNode1=createGeneralObjectNode(firstOperatorItem+1);
+			Node node1= new BinaryOperator(type1,operator1,leftNode1,rightNode1);
+			//go trought the other ones and  create the tree
+			if(sortedList.size()>=1) {
+				Node nodej=node1;
+				for(int j=1;j<sortedList.size();j++) {
+					int OperatorItemj=(Integer)sortedList.get(j).get(1);
+					String typej = listOfTokens.get(OperatorItemj).getType();
+					String operatorj=listOfTokens.get(OperatorItemj).getSymbol();
+					Node leftNodej=createGeneralObjectNode(OperatorItemj-1);;
+					Node rightNodej=node1;
+					nodej= new BinaryOperator(typej,operatorj,leftNodej,rightNodej);
+					node1=nodej;
+				}
+				parsingTree=nodej;
+			}
+			else {
+				parsingTree=node1;
+			}
 		}
 	}
 	
@@ -143,7 +187,9 @@ public class Parser {
 			Token token=listOfTokens.get(i);
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler);
-			
 		}
+		System.out.println(parsingTree.getType());
+		System.out.println(parsingTree.diplayTree());
+		
 	}
 }

@@ -3,11 +3,15 @@ package language.jaha.nodes;
 public class Variable extends GeneralObject{
 	
 	private String type;
-	private Node value;
+	private Object value;
 	
-	public Variable(String type, Node value) {
+	public Variable(String type, Object value) {
 		this.type = type;
 		this.value = value;
+	}
+	
+	public String diplayTree() {
+		return "(Value: "+this.value+")";
 	}
 	
 	public Object eval() {

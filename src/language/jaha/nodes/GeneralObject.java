@@ -3,7 +3,7 @@ package language.jaha.nodes;
 public abstract class GeneralObject implements Node{
 
 	private String type;
-	private Node value;
+	private Object value;
 	
 	
 	public abstract Object eval();

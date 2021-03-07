@@ -3,11 +3,15 @@ package language.jaha.nodes;
 public class Identifier extends GeneralObject{
 	
 	private String type;
-	private Node value;
+	private Object value;
 	
-	public Identifier(String type, Node value) {
+	public Identifier(String type, Object value) {
 		this.type = type;
 		this.value = value;
+	}
+	
+	public String diplayTree() {
+		return "(identifier)";//+this.value;
 	}
 	
 	public Object eval() {

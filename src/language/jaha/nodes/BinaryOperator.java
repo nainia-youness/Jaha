@@ -13,6 +13,10 @@ public class BinaryOperator implements Node{
 		this.leftNode = leftNode;
 	}
 	
+	public String diplayTree() {
+		return "(right Node: "+this.rightNode.diplayTree()+this.operator+ " left Node: "+this.leftNode.diplayTree()+")";
+	}
+	
 	public Object eval() {
 		return null;
 	}

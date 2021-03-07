@@ -12,7 +12,9 @@ public class UnaryOperator implements Node{
 		this.operator = operator;
 	}
 
-	
+	public String diplayTree() {
+		return "Value:"; 
+	}
 	
 	public Object eval() {
 		return null;
