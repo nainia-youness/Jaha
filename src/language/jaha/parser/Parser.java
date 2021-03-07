@@ -136,7 +136,7 @@ public class Parser {
 		if(!token.getType().equals("Semicolon")) {
 			if(token.getType().equals("LeftParen"))
 			{
-				//call the error handler to see if the right one is in the right place
+				errorHandler.isRightParenthesExist(i);
 				addedPriority+=30;
 			}
 			else if(token.getType().equals("RightParen")) {
@@ -160,36 +160,44 @@ public class Parser {
 			Node leftNode1=createGeneralObjectNode(firstOperatorItem-1);
 			Node rightNode1=createGeneralObjectNode(firstOperatorItem+1);
 			Node node1= new BinaryOperator(type1,operator1,leftNode1,rightNode1);
+			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node1);
+			int prevOperatorItem=firstOperatorItem;
 			//go trought the other ones and  create the tree
 			if(sortedList.size()>=1) {
 				Node nodej=node1;
+				Node leftNodej;
+				Node rightNodej;
 				for(int j=1;j<sortedList.size();j++) {
 					int OperatorItemj=(Integer)sortedList.get(j).get(1);
+					System.out.println(OperatorItemj);
 					String typej = listOfTokens.get(OperatorItemj).getType();
 					String operatorj=listOfTokens.get(OperatorItemj).getSymbol();
-					Node leftNodej=createGeneralObjectNode(OperatorItemj-1);;
-					Node rightNodej=node1;
+					if(prevOperatorItem>OperatorItemj)
+						leftNodej=createGeneralObjectNode(OperatorItemj-1);//not working
+					else
+						leftNodej=createGeneralObjectNode(OperatorItemj+1);
+					rightNodej=node1;
 					nodej= new BinaryOperator(typej,operatorj,leftNodej,rightNodej);
+					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)nodej);
 					node1=nodej;
+					prevOperatorItem=OperatorItemj;
 				}
 				parsingTree=nodej;
 			}
 			else {
 				parsingTree=node1;
 			}
+			System.out.println(parsingTree.diplayTree());
 		}
 	}
 	
 	public void parse() {
-		ErrorHandler errorHandler=new ErrorHandler();
-		
+		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
 			Token token=listOfTokens.get(i);
+			token.showToken();
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler);
 		}
-		System.out.println(parsingTree.getType());
-		System.out.println(parsingTree.diplayTree());
-		
 	}
 }
