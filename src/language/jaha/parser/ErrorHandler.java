@@ -51,6 +51,7 @@ public class ErrorHandler {
 			return true;
 		else if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Identifier"))
 			return true;
+		System.out.println(leftNode.getType()+" "+rightNode.getType());
 		return false;
 		//nodes can be binary operations
 	}
@@ -119,6 +120,8 @@ public class ErrorHandler {
 					throw new Exception("ERROR: Previous token not variable or parameter");
 				}
 				else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
+					//System.out.println(bo.ge);
+					System.out.println(bo.getOperator());
 					throw new Exception("ERROR: Binary operation parameters not allowedd");
 				}
 				else if(!isIdentifierInitialized(leftNode)) {//should be defined
@@ -130,6 +133,7 @@ public class ErrorHandler {
 			}
 
 	}
+	
 	
 	public void isRightParenthesExist(int i) throws Exception{
 		if(listOfTokens.get(i+1).getType().equals("Semicolon"))
@@ -143,12 +147,14 @@ public class ErrorHandler {
 				nbrLeftParenthes++;
 			}
 			if(listOfTokens.get(j).getType().equals("RightParen")) {
-				nbrRightParenthes++;
+				if(nbrLeftParenthes>nbrRightParenthes)
+					nbrRightParenthes++;
 			}
 		}
 		if(nbrLeftParenthes!=nbrRightParenthes)
 			throw new Exception("ERROR: Right Parenthesis is missing");
 	}
+	
 	
 	public void isLeftParenthesExist(int i) throws Exception{
 		if(i==0)
@@ -159,7 +165,8 @@ public class ErrorHandler {
 		int nbrRightParenthes=0;
 		for(int j=i;j>=0;j--) {
 			if(listOfTokens.get(j).getType().equals("LeftParen")) {
-				nbrLeftParenthes++;
+				if(nbrLeftParenthes<nbrRightParenthes)
+					nbrLeftParenthes++;
 			}
 			if(listOfTokens.get(j).getType().equals("RightParen")) {
 				nbrRightParenthes++;

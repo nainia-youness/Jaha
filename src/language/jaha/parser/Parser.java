@@ -16,7 +16,7 @@ public class Parser {
 
 	
 	//Node parsingTree;
-	List<Node> listOfParsingTrees=Arrays.asList();
+	List<Node> listOfParsingTrees=new ArrayList<> ();
 	List<Token> listOfTokens=Arrays.asList();
 	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
 	int addedPriority=0;
@@ -105,7 +105,12 @@ public class Parser {
 	
 	
 	public Node createBinaryOperatorNode(int operatorItem,int prevOperatorItem,Node prevNode) {
-		String type = listOfTokens.get(operatorItem+1).getType();
+		String type;
+		if(prevNode==null)
+			type = listOfTokens.get(operatorItem+1).getType();
+		else {
+			type = prevNode.getType();
+		}
 		String operator=listOfTokens.get(operatorItem).getSymbol();
 		Node leftNode;
 		Node rightNode;
@@ -114,10 +119,13 @@ public class Parser {
 			rightNode=createGeneralObjectNode(operatorItem+1);
 		}
 		else {
-			if(prevOperatorItem>operatorItem)
+			if(prevOperatorItem>operatorItem) {
 				leftNode=createGeneralObjectNode(operatorItem-1);
-			else
+			}
+				
+			else {
 				leftNode=createGeneralObjectNode(operatorItem+1);
+			}
 			rightNode=prevNode;
 		}
 		
@@ -182,7 +190,7 @@ public class Parser {
 			//we create the first leaf node
 			int firstOperatorItem=(Integer)priorityListOfOperators.get(0).get(1);
 			Node firstNode= createBinaryOperatorNode(firstOperatorItem,-1,null);
-			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)firstNode);
+			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)firstNode);//ERROR!!!
 			//go through the other ones and  create the tree
 			if(priorityListOfOperators.size()>1) {
 				int prevOperatorItem=firstOperatorItem;
@@ -191,7 +199,7 @@ public class Parser {
 				for(int j=1;j<priorityListOfOperators.size();j++) {
 					int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
 					nodej=createBinaryOperatorNode(OperatorItemj,prevOperatorItem,prevNode);
-					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)nodej);
+					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)nodej);//ERROR!!!!
 					prevNode=nodej;
 					prevOperatorItem=OperatorItemj;
 				}
@@ -202,20 +210,19 @@ public class Parser {
 			}
 			System.out.println(parsingTree.diplayTree());
 			System.out.println(parsingTree.eval());
-			//listOfParsingTrees.add(parsingTree);
+			listOfParsingTrees.add(parsingTree);
 			initialize();
-			System.out.println("-------------------- "+lineBinaryOperators);
-			//System.out.println(addedPriority);
 		}
 	}
 	
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			Token token=listOfTokens.get(i);
-			token.showToken();
+			//Token token=listOfTokens.get(i);
+			//token.showToken();
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler,"Semicolon");
 		}
+		//System.out.println(listOfParsingTrees);
 	}
 }
