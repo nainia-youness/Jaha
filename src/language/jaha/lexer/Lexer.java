@@ -221,7 +221,7 @@ public class Lexer {
 							Token t=new Token("Boolean",row,i,"true");
 							listOfTokens.add(t);
 						}
-						if(token.equals("false"))
+						else if(token.equals("false"))
 						{
 							Token t=new Token("Boolean",row,i,"false");
 							listOfTokens.add(t);

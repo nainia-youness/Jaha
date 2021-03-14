@@ -11,7 +11,7 @@ public class Variable extends GeneralObject{
 	}
 	
 	public String diplayTree() {
-		return "(Value: "+this.value+ "type: "+this.type+")";
+		return "(Value: "+this.value+" /type: "+this.type+")";
 	}
 	
 	public Object eval() {

@@ -14,7 +14,7 @@ public class BinaryOperator implements Node{
 	}
 	
 	public String diplayTree() {
-		return "(right Node: "+this.rightNode.diplayTree()+this.operator+ " left Node: "+this.leftNode.diplayTree()+")";
+		return "(right Node: "+this.rightNode.diplayTree()+" "+this.operator+ " left Node: "+this.leftNode.diplayTree()+")";
 	}
 	
 	public Object eval() {
@@ -32,62 +32,74 @@ public class BinaryOperator implements Node{
 			else if(this.leftNode.getType().equals("String") && this.rightNode.getType().equals("String"))
 				return (String)this.leftNode.eval()+(String)this.rightNode.eval();
 		case "-":
-			if(this.leftNode.getType().equals("Integer"))
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
 				return (Integer)this.leftNode.eval()-(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
 				return (Double)this.leftNode.eval()-(Double)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Integer"))
+				return (Double)this.leftNode.eval()-(Integer)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Double"))
+				return (Integer)this.leftNode.eval()-(Double)this.rightNode.eval();
 		case "*":
-			if(this.leftNode.getType().equals("Integer"))
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
 				return (Integer)this.leftNode.eval()*(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
 				return (Double)this.leftNode.eval()*(Double)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Integer"))
+				return (Double)this.leftNode.eval()*(Integer)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Double"))
+				return (Integer)this.leftNode.eval()*(Double)this.rightNode.eval();
 		case "/":
-			if(this.leftNode.getType().equals("Integer"))
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
 				return (Integer)(this.leftNode.eval())*1.00/(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
 				return (Double)this.leftNode.eval()/(Double)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Integer"))
+				return (Double)this.leftNode.eval()/(Integer)this.rightNode.eval();
+			else if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Double"))
+				return (Integer)this.leftNode.eval()/(Double)this.rightNode.eval();
 		case "%":
-			if(this.leftNode.getType().equals("Integer"))
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
 				return (Integer)this.leftNode.eval()%(Integer)this.rightNode.eval();
 		case "==":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()==(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()==(Double)this.rightNode.eval();		
-			else if(this.leftNode.getType().equals("String"))
-				return (String)this.leftNode.eval()==(String)this.rightNode.eval();		
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()==(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()==(Double)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("String") && this.rightNode.getType().equals("String"))
+				return (Boolean)(((String)this.leftNode.eval()).equals((String)this.rightNode.eval()));
 		case "!=":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()!=(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()!=(Double)this.rightNode.eval();		
-			else if(this.leftNode.getType().equals("String"))
-				return (String)this.leftNode.eval()!=(String)this.rightNode.eval();	
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()!=(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()!=(Double)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("String") && this.rightNode.getType().equals("String"))
+				return (Boolean)(!((String)this.leftNode.eval()).equals((String)this.rightNode.eval()));
 		case ">":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()>(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()>(Double)this.rightNode.eval();		
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()>(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()>(Double)this.rightNode.eval());
 		case "<":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()<(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()<(Double)this.rightNode.eval();		
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()<(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()<(Double)this.rightNode.eval());	
 		case ">=":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()>=(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()>=(Double)this.rightNode.eval();		
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()>=(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()>=(Double)this.rightNode.eval());
 		case "<=":
-			if(this.leftNode.getType().equals("Integer"))
-				return (Integer)this.leftNode.eval()<=(Integer)this.rightNode.eval();
-			else if(this.leftNode.getType().equals("Double"))
-				return (Double)this.leftNode.eval()<=(Double)this.rightNode.eval();		
+			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
+				return (Boolean)((Integer)this.leftNode.eval()<=(Integer)this.rightNode.eval());
+			else if(this.leftNode.getType().equals("Double") && this.rightNode.getType().equals("Double"))
+				return (Boolean)((Double)this.leftNode.eval()<=(Double)this.rightNode.eval());	
 		case "&&":
-			if(this.leftNode.getType().equals("Boolean"))
+			if(this.leftNode.getType().equals("Boolean") && this.rightNode.getType().equals("Boolean"))
 				return (Boolean)this.leftNode.eval()&&(Boolean)this.rightNode.eval();			
 		case "||":
-			if(this.leftNode.getType().equals("Boolean"))
+			if(this.leftNode.getType().equals("Boolean") && this.rightNode.getType().equals("Boolean"))
 				return (Boolean)this.leftNode.eval()||(Boolean)this.rightNode.eval();			
 		case "=":
 			if(this.rightNode.getType().equals("Integer"))
@@ -96,6 +108,8 @@ public class BinaryOperator implements Node{
 				return (Double)this.rightNode.eval();
 			else if(this.rightNode.getType().equals("String"))
 				return (String)this.rightNode.eval();
+			else if(this.rightNode.getType().equals("Boolean"))
+				return (Boolean)this.rightNode.eval();
 		default:
 			return null;
 		}	

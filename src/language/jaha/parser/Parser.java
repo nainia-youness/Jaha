@@ -97,6 +97,14 @@ public class Parser {
 		else if(token.getType().equals("String")) {
 			go= new Variable(token.getType(),token.getSymbol());
 		}
+		else if(token.getType().equals("Boolean")) {
+			boolean value;
+			if(token.getSymbol()=="true")
+				value=true;
+			else
+				value=false;
+			go= new Variable(token.getType(),value);
+		}
 		else{//it s an identifier
 			go= new Identifier(token.getType(),token.getSymbol(),token.getSymbol());
 		}
@@ -106,11 +114,6 @@ public class Parser {
 	
 	public Node createBinaryOperatorNode(int operatorItem,int prevOperatorItem,Node prevNode) {
 		String type;
-		if(prevNode==null)
-			type = listOfTokens.get(operatorItem+1).getType();
-		else {
-			type = prevNode.getType();
-		}
 		String operator=listOfTokens.get(operatorItem).getSymbol();
 		Node leftNode;
 		Node rightNode;
@@ -128,7 +131,22 @@ public class Parser {
 			}
 			rightNode=prevNode;
 		}
-		
+		if(operator.equals("/"))
+			type="Double";
+		else if(operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<=") || operator.equals("==") || operator.equals("!=")) {
+			type="Boolean";
+		}
+		else {
+			if(leftNode.getType().equals("Double") || rightNode.getType().equals("Double"))
+				type="Double";
+			else {
+				if(prevNode==null)
+					type = listOfTokens.get(operatorItem+1).getType();
+				else {
+					type = prevNode.getType();
+				}
+			}
+		}
 		Node node= new BinaryOperator(type,operator,leftNode,rightNode);
 		return node;
 	}
@@ -219,8 +237,8 @@ public class Parser {
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			//Token token=listOfTokens.get(i);
-			//token.showToken();
+			Token token=listOfTokens.get(i);
+			token.showToken();
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler,"Semicolon");
 		}

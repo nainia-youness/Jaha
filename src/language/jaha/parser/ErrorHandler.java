@@ -16,7 +16,7 @@ public class ErrorHandler {
 	
 	
 	public boolean isTokenGeneralObject(Node node,boolean isRightNode) {
-		boolean isTokenGeneralObject= node.getType().equals("Integer") || node.getType().equals("Double") || node.getType().equals("Identifier");
+		boolean isTokenGeneralObject= node.getType().equals("Integer") || node.getType().equals("Double") || node.getType().equals("Identifier") || node.getType().equals("Boolean");
 		if(isRightNode) {
 			return node.getType().equals("LeftParen") || isTokenGeneralObject;
 		}
@@ -26,18 +26,26 @@ public class ErrorHandler {
 		//this is just for leaf nodes MUST BE UPDATED!
 	}
 	
-	public boolean isBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
-		if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Integer"))
-			return true;
-		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Double"))
-			return true;
-		else if(leftNode.getType().equals("String") && rightNode.getType().equals("String"))
-			return true;
-		else if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Boolean"))
+	public boolean isBooleanBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
+		if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Boolean"))
 			return true;
 		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("Boolean"))
 			return true;
 		else if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Identifier"))
+			return true;
+		return false;
+	}
+	
+	public boolean isNumericalBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
+		if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Integer"))
+			return true;
+		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Double"))
+			return true;
+		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Integer"))
+			return true;
+		else if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Double"))
+			return true;
+		else if(leftNode.getType().equals("String") && rightNode.getType().equals("String"))
 			return true;
 		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("String"))
 			return true;
@@ -51,10 +59,11 @@ public class ErrorHandler {
 			return true;
 		else if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Identifier"))
 			return true;
-		System.out.println(leftNode.getType()+" "+rightNode.getType());
+		//System.out.println(leftNode.getType()+" "+rightNode.getType());
 		return false;
 		//nodes can be binary operations
 	}
+	
 	public void isSortedListNull(List<List<Object>> priorityListOfOperators) throws Exception {
 		if(priorityListOfOperators.isEmpty())
 			throw new Exception("ERROR: no binary operation found ");
@@ -74,17 +83,39 @@ public class ErrorHandler {
 			if(!isTokenGeneralObject(rightNode,true)) {
 				throw new Exception("ERROR: Next token not variable or parameter");
 			}
+			if(!isTokenGeneralObject(leftNode,false)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			if(!isTokenGeneralObject(rightNode,true)) {
+				throw new Exception("ERROR: Next token not variable or parameter");
+			}
 			else if(!leftNode.getType().equals("Identifier")) {
 				throw new Exception("ERROR: You cannot assign to a different type than an Identifier");
 			}
 		}
-		else if(bo.getOperator().equals("==") || bo.getOperator().equals("!=") || bo.getOperator().equals(">") || bo.getOperator().equals("<") || bo.getOperator().equals(">=") || bo.getOperator().equals("<=")) {
+		else if(bo.getOperator().equals(">") || bo.getOperator().equals("<") || bo.getOperator().equals(">=") || bo.getOperator().equals("<=")) {
 			if(!isTokenGeneralObject(rightNode,true))
 				throw new Exception("ERROR: Next token not variable or parameter");
 			if(!isTokenGeneralObject(leftNode,false)) {
 				throw new Exception("ERROR: Previous token not variable or parameter");
 			}
-			else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
+			else if(!isNumericalBinaryOperationTypeAllowed(leftNode,rightNode)) {
+				throw new Exception("ERROR: Binary operation parameters not allowed");
+			}
+			else if(!isIdentifierInitialized(leftNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+			else if(!isIdentifierInitialized(rightNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+		}
+		else if(bo.getOperator().equals("==") || bo.getOperator().equals("!=")) {
+			if(!isTokenGeneralObject(rightNode,true))
+				throw new Exception("ERROR: Next token not variable or parameter");
+			if(!isTokenGeneralObject(leftNode,false)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			else if(!isNumericalBinaryOperationTypeAllowed(leftNode,rightNode) && !isBooleanBinaryOperationTypeAllowed(leftNode,rightNode)) {
 				throw new Exception("ERROR: Binary operation parameters not allowed");
 			}
 			else if(!isIdentifierInitialized(leftNode)) {
@@ -95,17 +126,31 @@ public class ErrorHandler {
 			}
 		}
 		else if(bo.getOperator().equals("&&") ||  bo.getOperator().equals("||")) {
-			if(!leftNode.getType().equals("Boolean") || !leftNode.getType().equals("LeftParen")) {
-				throw new Exception("ERROR: Previous token not variable or parameter");
-			}
-			else if(!rightNode.getType().equals("Boolean") || !leftNode.getType().equals("RightParen")) {
+			if(!isTokenGeneralObject(rightNode,true)) {
 				throw new Exception("ERROR: Next token not variable or parameter");
 			}
-			else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
-				throw new Exception("ERROR: Binary operation parameters not allowed");
+			if(!isTokenGeneralObject(leftNode,false)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			if(!isBooleanBinaryOperationTypeAllowed(leftNode,rightNode)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
 			}
 			else if(!isIdentifierInitialized(leftNode)) {
 				throw new Exception("ERROR: Variable not initialized");
+			}
+			else if(!isIdentifierInitialized(rightNode)) {
+				throw new Exception("ERROR: Variable not initialized");
+			}
+		}
+		else if(bo.getOperator().equals("%")) {
+			if(!isTokenGeneralObject(rightNode,true)) {
+				throw new Exception("ERROR: Next token not variable or parameter");
+			}
+			if(!isTokenGeneralObject(leftNode,false)) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
+			}
+			if(!(leftNode.getType().equals("Integer") && leftNode.getType().equals("Integer"))) {
+				throw new Exception("ERROR: Previous token not variable or parameter");
 			}
 			else if(!isIdentifierInitialized(rightNode)) {
 				throw new Exception("ERROR: Variable not initialized");
@@ -119,9 +164,7 @@ public class ErrorHandler {
 				if(!isTokenGeneralObject(leftNode,false)) {
 					throw new Exception("ERROR: Previous token not variable or parameter");
 				}
-				else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
-					//System.out.println(bo.ge);
-					System.out.println(bo.getOperator());
+				else if(!isNumericalBinaryOperationTypeAllowed(leftNode,rightNode)) {
 					throw new Exception("ERROR: Binary operation parameters not allowedd");
 				}
 				else if(!isIdentifierInitialized(leftNode)) {//should be defined
