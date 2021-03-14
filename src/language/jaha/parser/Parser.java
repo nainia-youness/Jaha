@@ -15,9 +15,12 @@ import language.jaha.nodes.Variable;
 public class Parser {
 
 	
-	Node parsingTree;
+	//Node parsingTree;
 	List<Node> listOfParsingTrees=Arrays.asList();
 	List<Token> listOfTokens=Arrays.asList();
+	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
+	int addedPriority=0;
+	
 	
 	public Parser(List<Token> listOfTokens) {
 		this.listOfTokens=listOfTokens;
@@ -50,7 +53,7 @@ public class Parser {
 	);
 	
 		
-	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
+	
 	
 	public int getPriorityOfBinaryOp(String operator) {
 		for(int i=0;i<binaryOperators.size();i++) {
@@ -79,7 +82,7 @@ public class Parser {
 		return lineBinaryOperators;
 	}
 	
-	int addedPriority=0;
+	
 	
 	
 	public Node createGeneralObjectNode(int i) {
@@ -95,10 +98,33 @@ public class Parser {
 			go= new Variable(token.getType(),token.getSymbol());
 		}
 		else{//it s an identifier
-			go= new Identifier(token.getType(),token.getSymbol());
+			go= new Identifier(token.getType(),token.getSymbol(),token.getSymbol());
 		}
 		return go;
 	}
+	
+	
+	public Node createBinaryOperatorNode(int operatorItem,int prevOperatorItem,Node prevNode) {
+		String type = listOfTokens.get(operatorItem+1).getType();
+		String operator=listOfTokens.get(operatorItem).getSymbol();
+		Node leftNode;
+		Node rightNode;
+		if(prevNode==null) {
+			leftNode=createGeneralObjectNode(operatorItem-1);
+			rightNode=createGeneralObjectNode(operatorItem+1);
+		}
+		else {
+			if(prevOperatorItem>operatorItem)
+				leftNode=createGeneralObjectNode(operatorItem-1);
+			else
+				leftNode=createGeneralObjectNode(operatorItem+1);
+			rightNode=prevNode;
+		}
+		
+		Node node= new BinaryOperator(type,operator,leftNode,rightNode);
+		return node;
+	}
+	
 	
 	public boolean isBinaryOperation(int j) {
 		if(j==0)
@@ -119,13 +145,19 @@ public class Parser {
 		return false;
 	}
 	
-	public void initializeParsingTree() {
-		//parsingTree=new Node();
+	
+	public void initialize() {
+		addedPriority=0;
+		for(int i=0;i<lineBinaryOperators.size();i++) {
+			lineBinaryOperators.remove(i);
+		}
+		lineBinaryOperators.remove(0);
 	}
 	
-	public void parseExpression(int i,ErrorHandler errorHandler) throws Exception {
+	
+	public void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
-		if(!token.getType().equals("Semicolon")) {
+		if(!token.getType().equals(endType)) {
 			if(token.getType().equals("LeftParen"))
 			{
 				errorHandler.isRightParenthesExist(i);
@@ -140,51 +172,40 @@ public class Parser {
 				priority+=addedPriority;
 				List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
 				lineBinaryOperators.add(bo);
-				//token.showToken();
 			}
 		}
-		else {//you have reached the semicolon
-			List<List<Object>> sortedList=sortListByPriority();
-			System.out.println(sortedList);
+		else {//you have reached the semicolon for example
+			Node parsingTree;
+			List<List<Object>> priorityListOfOperators=sortListByPriority();
+			System.out.println(priorityListOfOperators);
+			errorHandler.isSortedListNull(priorityListOfOperators);
 			//we create the first leaf node
-			int firstOperatorItem=(Integer)sortedList.get(0).get(1);
-			//String type1 = listOfTokens.get(firstOperatorItem).getType();
-			String type1 = listOfTokens.get(firstOperatorItem+1).getType();
-			String operator1=listOfTokens.get(firstOperatorItem).getSymbol();
-			Node leftNode1=createGeneralObjectNode(firstOperatorItem-1);
-			Node rightNode1=createGeneralObjectNode(firstOperatorItem+1);
-			Node node1= new BinaryOperator(type1,operator1,leftNode1,rightNode1);
-			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node1);
-			int prevOperatorItem=firstOperatorItem;
-			//go trought the other ones and  create the tree
-			if(sortedList.size()>=1) {
-				Node nodej=node1;
-				Node leftNodej;
-				Node rightNodej;
-				for(int j=1;j<sortedList.size();j++) {
-					int OperatorItemj=(Integer)sortedList.get(j).get(1);
-					System.out.println(OperatorItemj);
-					String typej = listOfTokens.get(OperatorItemj+1).getType();
-					String operatorj=listOfTokens.get(OperatorItemj).getSymbol();
-					if(prevOperatorItem>OperatorItemj)
-						leftNodej=createGeneralObjectNode(OperatorItemj-1);
-					else
-						leftNodej=createGeneralObjectNode(OperatorItemj+1);
-					rightNodej=node1;
-					nodej= new BinaryOperator(typej,operatorj,leftNodej,rightNodej);
+			int firstOperatorItem=(Integer)priorityListOfOperators.get(0).get(1);
+			Node firstNode= createBinaryOperatorNode(firstOperatorItem,-1,null);
+			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)firstNode);
+			//go through the other ones and  create the tree
+			if(priorityListOfOperators.size()>1) {
+				int prevOperatorItem=firstOperatorItem;
+				Node prevNode=firstNode;
+				Node nodej=prevNode;
+				for(int j=1;j<priorityListOfOperators.size();j++) {
+					int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
+					nodej=createBinaryOperatorNode(OperatorItemj,prevOperatorItem,prevNode);
 					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)nodej);
-					node1=nodej;
+					prevNode=nodej;
 					prevOperatorItem=OperatorItemj;
 				}
 				parsingTree=nodej;
 			}
 			else {
-				parsingTree=node1;
+				parsingTree=firstNode;
 			}
 			System.out.println(parsingTree.diplayTree());
 			System.out.println(parsingTree.eval());
-			listOfParsingTrees.add(parsingTree);
-			//have to initialize the parsingTree
+			//listOfParsingTrees.add(parsingTree);
+			initialize();
+			System.out.println("-------------------- "+lineBinaryOperators);
+			//System.out.println(addedPriority);
 		}
 	}
 	
@@ -194,7 +215,7 @@ public class Parser {
 			Token token=listOfTokens.get(i);
 			token.showToken();
 			//if no key word in the line , only expressions
-			parseExpression(i,errorHandler);
+			parseExpression(i,errorHandler,"Semicolon");
 		}
 	}
 }

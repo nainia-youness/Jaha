@@ -35,10 +35,29 @@ public class ErrorHandler {
 			return true;
 		else if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Boolean"))
 			return true;
+		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("Boolean"))
+			return true;
+		else if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Identifier"))
+			return true;
+		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("String"))
+			return true;
+		else if(leftNode.getType().equals("String") && rightNode.getType().equals("Identifier"))
+			return true;
+		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("Double"))
+			return true;
+		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Identifier"))
+			return true;
+		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("Integer"))
+			return true;
+		else if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Identifier"))
+			return true;
 		return false;
 		//nodes can be binary operations
 	}
-	
+	public void isSortedListNull(List<List<Object>> priorityListOfOperators) throws Exception {
+		if(priorityListOfOperators.isEmpty())
+			throw new Exception("ERROR: no binary operation found ");
+	}
 	
 	public boolean isIdentifierInitialized(Node node) {
 		if(node.getType().equals("Identifier")){
@@ -100,7 +119,7 @@ public class ErrorHandler {
 					throw new Exception("ERROR: Previous token not variable or parameter");
 				}
 				else if(!isBinaryOperationTypeAllowed(leftNode,rightNode)) {
-					throw new Exception("ERROR: Binary operation parameters not allowed");
+					throw new Exception("ERROR: Binary operation parameters not allowedd");
 				}
 				else if(!isIdentifierInitialized(leftNode)) {//should be defined
 					throw new Exception("ERROR: Variable not initialized");

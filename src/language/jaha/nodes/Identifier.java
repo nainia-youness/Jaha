@@ -4,10 +4,12 @@ public class Identifier extends GeneralObject{
 	
 	private String type;
 	private Object value;
+	private String symbol;
 	
-	public Identifier(String type, Object value) {
+	public Identifier(String type, Object value,String symbol) {
 		this.type = type;
 		this.value = value;
+		this.symbol=symbol;
 	}
 	
 	public String diplayTree() {
@@ -18,6 +20,14 @@ public class Identifier extends GeneralObject{
 		return this.value;
 	}
 	
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
+	}
+
 	public String getType() {
 		return type;
 	}

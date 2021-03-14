@@ -2,12 +2,12 @@ package language.jaha.nodes;
 
 public class UnaryOperator implements Node{
 
-	private Node value;
+	private Node childNode;
 	private String type;
 	private String operator;
 	
 	public UnaryOperator(Node value, String type, String operator) {
-		this.value = value;
+		this.childNode = childNode;
 		this.type = type;
 		this.operator = operator;
 	}
@@ -36,14 +36,14 @@ public class UnaryOperator implements Node{
 		}*/
 	}
 	
-	public Object getValue() {
-		return value;
+	public Object getChildNode() {
+		return childNode;
 	}
 
 
 
-	public void setValue(Node value) {
-		this.value = value;
+	public void setChildNode(Node childNode) {
+		this.childNode = childNode;
 	}
 
 
