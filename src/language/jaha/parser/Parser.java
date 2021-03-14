@@ -159,7 +159,8 @@ public class Parser {
 		for(int i=0;i<lineBinaryOperators.size();i++) {
 			lineBinaryOperators.remove(i);
 		}
-		lineBinaryOperators.remove(0);
+		if(lineBinaryOperators.size()>1)
+			lineBinaryOperators.remove(0);
 	}
 	
 	
