@@ -20,6 +20,7 @@ public class Parser {
 	List<Token> listOfTokens=Arrays.asList();
 	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
 	int addedPriority=0;
+	List<List<Object>> ListOfNodes=new ArrayList<> (Arrays.asList());
 	
 	
 	public Parser(List<Token> listOfTokens) {
@@ -112,46 +113,6 @@ public class Parser {
 	}
 	
 	
-	public Node createBinaryOperatorNode(int operatorItem,int prevOperatorItem,Node prevNode) {
-		String type;
-		String operator=listOfTokens.get(operatorItem).getSymbol();
-		Node leftNode;
-		Node rightNode;
-		if(prevNode==null) {
-			leftNode=createGeneralObjectNode(operatorItem-1);
-			rightNode=createGeneralObjectNode(operatorItem+1);
-		}
-		else {
-			if(prevOperatorItem>operatorItem) {
-				leftNode=createGeneralObjectNode(operatorItem-1);
-			}
-				
-			else {
-				leftNode=createGeneralObjectNode(operatorItem+1);
-			}
-			rightNode=prevNode;
-		}
-		if(operator.equals("/"))
-			type="Double";
-		else if(operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<=") || operator.equals("==") || operator.equals("!=")) {
-			type="Boolean";
-		}
-		else {
-			if(leftNode.getType().equals("Double") || rightNode.getType().equals("Double"))
-				type="Double";
-			else {
-				if(prevNode==null)
-					type = listOfTokens.get(operatorItem+1).getType();
-				else {
-					type = prevNode.getType();
-				}
-			}
-		}
-		Node node= new BinaryOperator(type,operator,leftNode,rightNode);
-		return node;
-	}
-	
-	
 	public boolean isBinaryOperation(int j) {
 		if(j==0)
 			return false;
@@ -182,6 +143,81 @@ public class Parser {
 	}
 	
 	
+	boolean isRightNode(List<List<Object>> priorityListOfOperators,int j) {
+		int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
+		if(listOfTokens.get(OperatorItemj+1).getSymbol().equals("("))
+			return true;
+		for(int i=0;i<j;i++) {
+			if((Integer)priorityListOfOperators.get(i).get(1)==OperatorItemj+2)
+				return true;
+		}
+		return false;
+	}
+	
+	boolean isLeftNode(List<List<Object>> priorityListOfOperators,int j) {
+		
+		int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
+		if(listOfTokens.get(OperatorItemj-1).getSymbol().equals(")")) {
+			return true;
+		}
+			
+		for(int i=0;i<j;i++) {
+			if((Integer)priorityListOfOperators.get(i).get(1)==OperatorItemj-2) {
+				return true;
+			}
+				
+		}
+		return false;
+	}
+	
+	Node getLeftNode(int OperatorItemj) {//return the node with the minimum index bigger than OperatorItemj
+		if(ListOfNodes.size()==0) return null;
+		int maxIndex=0;
+		int j=0;
+		for(int i=0;i<ListOfNodes.size();i++) {
+			if((Integer)ListOfNodes.get(i).get(0)-OperatorItemj>maxIndex)
+			{
+				maxIndex=(Integer)ListOfNodes.get(i).get(0)-OperatorItemj;
+				j=i;
+			}
+		}
+		Node node=(Node)ListOfNodes.get(j).get(1);
+		ListOfNodes.remove(j);
+		return node;
+	}
+	
+	Node getRightNode(int OperatorItemj) {//return the node with the maximum index smaller than OperatorItemj
+		if(ListOfNodes.size()==0) return null;
+		int minIndex=100000;
+		int j=0;
+		for(int i=0;i<ListOfNodes.size();i++) {
+			if(OperatorItemj-(Integer)ListOfNodes.get(i).get(0)<minIndex) {
+				minIndex=OperatorItemj-(Integer)ListOfNodes.get(i).get(0);
+				j=i;
+			}
+		}
+		Node node=(Node)ListOfNodes.get(j).get(1);
+		ListOfNodes.remove(j);
+		return node;
+	}
+	
+	String getTypeOfBinaryOperator(String operator,Node leftNode,Node rightNode){
+		String type;
+		if(operator.equals("/"))
+			type="Double";
+		else if(operator.equals(">") || operator.equals(">=") || operator.equals("<") || operator.equals("<=") || operator.equals("==") || operator.equals("!=")) {
+			type="Boolean";
+		}
+		else {
+			if(leftNode.getType().equals("Double") || rightNode.getType().equals("Double"))
+				type="Double";
+			else {
+				type=leftNode.getType();
+			}
+		}
+		return type;
+	}
+	
 	public void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(!token.getType().equals(endType)) {
@@ -202,34 +238,45 @@ public class Parser {
 			}
 		}
 		else {//you have reached the semicolon for example
-			Node parsingTree;
 			List<List<Object>> priorityListOfOperators=sortListByPriority();
 			System.out.println(priorityListOfOperators);
 			errorHandler.isSortedListNull(priorityListOfOperators);
-			//we create the first leaf node
-			int firstOperatorItem=(Integer)priorityListOfOperators.get(0).get(1);
-			Node firstNode= createBinaryOperatorNode(firstOperatorItem,-1,null);
-			errorHandler.BinaryOperatorErrorCheck((BinaryOperator)firstNode);//ERROR!!!
-			//go through the other ones and  create the tree
-			if(priorityListOfOperators.size()>1) {
-				int prevOperatorItem=firstOperatorItem;
-				Node prevNode=firstNode;
-				Node nodej=prevNode;
-				for(int j=1;j<priorityListOfOperators.size();j++) {
-					int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
-					nodej=createBinaryOperatorNode(OperatorItemj,prevOperatorItem,prevNode);
-					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)nodej);//ERROR!!!!
-					prevNode=nodej;
-					prevOperatorItem=OperatorItemj;
+			Node node;
+			for(int j=0;j<priorityListOfOperators.size();j++) {
+				int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
+				Node leftNode;
+				Node rightNode;
+				if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
+					leftNode=createGeneralObjectNode(OperatorItemj-1);
+					rightNode=createGeneralObjectNode(OperatorItemj+1);
 				}
-				parsingTree=nodej;
+				else {
+					if(isLeftNode(priorityListOfOperators,j)) {
+						leftNode=getLeftNode(OperatorItemj);
+					}
+					else {
+						leftNode=createGeneralObjectNode(OperatorItemj-1);
+					}
+					if(isRightNode(priorityListOfOperators,j)) {
+						rightNode=getRightNode(OperatorItemj);
+					}
+					else {
+						rightNode=createGeneralObjectNode(OperatorItemj+1);
+					}
+				}
+				//System.out.println("left node= "+leftNode.diplayTree());
+				//System.out.println("right node= "+rightNode.diplayTree());
+				String operator=listOfTokens.get(OperatorItemj).getSymbol();
+				String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
+				node= new BinaryOperator(type,operator,leftNode,rightNode);
+				//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
+				ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+				errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node);
 			}
-			else {
-				parsingTree=firstNode;
-			}
+			
+			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
 			System.out.println(parsingTree.diplayTree());
 			System.out.println(parsingTree.eval());
-			listOfParsingTrees.add(parsingTree);
 			initialize();
 		}
 	}
@@ -237,8 +284,8 @@ public class Parser {
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			Token token=listOfTokens.get(i);
-			token.showToken();
+			//Token token=listOfTokens.get(i);
+			//token.showToken();
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler,"Semicolon");
 		}
