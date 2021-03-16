@@ -10,6 +10,7 @@ import language.jaha.nodes.BinaryOperator;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
 import language.jaha.nodes.Node;
+import language.jaha.nodes.UnaryOperator;
 import language.jaha.nodes.Variable;
 
 public class Parser {
@@ -18,7 +19,7 @@ public class Parser {
 	//Node parsingTree;
 	List<Node> listOfParsingTrees=new ArrayList<> ();
 	List<Token> listOfTokens=Arrays.asList();
-	List<List<Object>> lineBinaryOperators=new ArrayList<> (Arrays.asList());
+	List<List<Object>> lineOfOperators=new ArrayList<> (Arrays.asList());
 	int addedPriority=0;
 	List<List<Object>> ListOfNodes=new ArrayList<> (Arrays.asList());
 	
@@ -28,12 +29,11 @@ public class Parser {
 	}
 	
 	final List<List<String>> unaryOperators=Arrays.asList(
-	Arrays.asList("!","Op_not","13"),
-	Arrays.asList("&","Op_and","7"),
-	Arrays.asList("|","Op_or","5"),
+	Arrays.asList("!","Unary_Op_not","13"),
 	Arrays.asList("++","Op_increment","14"),
 	Arrays.asList("--","Op_negativeincrement","14"),
-	Arrays.asList("-","Op_subtract","13")
+	Arrays.asList("-","Unary_Op_subtract","13"),
+	Arrays.asList("+","Unary_Op_add","13")
 	);
 	
 	final List<List<String>> binaryOperators=Arrays.asList(//priorite max 14 , pour les ( 15
@@ -65,22 +65,30 @@ public class Parser {
 		return 0;//error
 	}
 	
+	private int getPriorityOfUnaryOp(String operator) {
+		for(int i=0;i<unaryOperators.size();i++) {
+			if(operator.equals(unaryOperators.get(i).get(0))) {
+				return Integer.parseInt(unaryOperators.get(i).get(2));
+			}
+		}
+		return 0;//error
+	}
 	
 	private List<List<Object>> sortListByPriority(){
 		int j=0;
-		while(j<lineBinaryOperators.size()) {
-			int max=(Integer)lineBinaryOperators.get(j).get(2);
+		while(j<lineOfOperators.size()) {
+			int max=(Integer)lineOfOperators.get(j).get(2);
 			int maxi=j;
-			for(int i=j;i<lineBinaryOperators.size();i++) {
-				if(max<(Integer)lineBinaryOperators.get(i).get(2)) {
-					max=(Integer)lineBinaryOperators.get(i).get(2);
+			for(int i=j;i<lineOfOperators.size();i++) {
+				if(max<(Integer)lineOfOperators.get(i).get(2)) {
+					max=(Integer)lineOfOperators.get(i).get(2);
 					maxi=i;
 				}
 			}
-			Collections.swap(lineBinaryOperators, j, maxi);
+			Collections.swap(lineOfOperators, j, maxi);
 			j++;
 		}
-		return lineBinaryOperators;
+		return lineOfOperators;
 	}
 	
 	
@@ -116,7 +124,7 @@ public class Parser {
 	public boolean isBinaryOperation(int j) {
 		if(j==0)
 			return false;
-		if(this.listOfTokens.get(j).getSymbol().equals("-"))
+		if(this.listOfTokens.get(j).getSymbol().equals("-") || this.listOfTokens.get(j).getSymbol().equals("+"))
 		{
 			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
 				return true;
@@ -132,15 +140,24 @@ public class Parser {
 		return false;
 	}
 	
+	public boolean isUnaryOperation(int j) {
+		for(int i=0;i<unaryOperators.size();i++) {
+			if(this.listOfTokens.get(j).getSymbol().equals(unaryOperators.get(i).get(0)))
+				return true;
+		}
+		return false;
+	}
+	
+	
 	
 	private void initialize() {
 		ListOfNodes.remove(0);
 		addedPriority=0;
-		for(int i=0;i<lineBinaryOperators.size();i++) {
-			lineBinaryOperators.remove(i);
+		for(int i=0;i<lineOfOperators.size();i++) {
+			lineOfOperators.remove(i);
 		}
-		if(lineBinaryOperators.size()>1)
-			lineBinaryOperators.remove(0);
+		if(lineOfOperators.size()>1)
+			lineOfOperators.remove(0);
 	}
 	
 	
@@ -150,7 +167,7 @@ public class Parser {
 			Token token=listOfTokens.get(OperatorItemj+1);
 			int i=OperatorItemj+1;
 			while(i<listOfTokens.size() && !token.getSymbol().equals(")")) {
-				if(isBinaryOperation(i)) 
+				if(isBinaryOperation(i) || isUnaryOperation(i)) 
 					return true;
 				token=listOfTokens.get(i);
 				i++;
@@ -188,6 +205,7 @@ public class Parser {
 		}
 		return false;
 	}
+	
 	
 	private Node getLeftNode(int OperatorItemj) {//return the node with the minimum index bigger than OperatorItemj
 		if(ListOfNodes.size()==0) return null;
@@ -237,6 +255,11 @@ public class Parser {
 		return type;
 	}
 	
+	private String getTypeOfUnaryOperator(String operator,Node childNode){
+		String type;
+		return childNode.getType();
+	}
+	
 	private int getLeftVariableIndex(int OperatorItemj) {
 		int i=OperatorItemj-1;
 		while(i>=0){
@@ -259,6 +282,7 @@ public class Parser {
 	
 	private void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
+		errorHandler.isExistingOperator(token);
 		if(!token.getType().equals(endType)) {
 			if(token.getType().equals("LeftParen"))
 			{
@@ -269,52 +293,81 @@ public class Parser {
 				errorHandler.isLeftParenthesExist(i);
 				addedPriority-=30;
 			}
+			int priority;
 			if(isBinaryOperation(i)) {
-				int priority=getPriorityOfBinaryOp(token.getSymbol());
+				priority=getPriorityOfBinaryOp(token.getSymbol());
 				priority+=addedPriority;
 				List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
-				lineBinaryOperators.add(bo);
+				lineOfOperators.add(bo);
+			}
+			else if(isUnaryOperation(i)) {
+				priority=getPriorityOfUnaryOp(token.getSymbol());
+				priority+=addedPriority;
+				List<Object> uo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
+				lineOfOperators.add(uo);
 			}
 		}
 		else {//you have reached the semicolon for example
 			List<List<Object>> priorityListOfOperators=sortListByPriority();
 			System.out.println(priorityListOfOperators);
 			errorHandler.isSortedListNull(priorityListOfOperators);
-			Node node;
 			for(int j=0;j<priorityListOfOperators.size();j++) {
+				Node node;
 				int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
-				Node leftNode;
-				Node rightNode;
-				if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
-					leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
-					rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-				}
-				else {		
-					if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
+				if(isBinaryOperation(OperatorItemj)) {
+					System.out.println("-------binary operator");
+					Node leftNode;
+					Node rightNode;
+					if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
 						leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
-						rightNode=getRightNode(OperatorItemj);
-						System.out.println("left not node and right node");
-					}
-					else if(isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)){
-						leftNode=getLeftNode(OperatorItemj);
 						rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-						System.out.println("left node and right not node");
+					}
+					else {		
+						if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
+							leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
+							rightNode=getRightNode(OperatorItemj);
+							System.out.println("left not node and right node");
+						}
+						else if(isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)){
+							leftNode=getLeftNode(OperatorItemj);
+							rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
+							System.out.println("left node and right not node");
+						}
+						else {
+							rightNode=getLeftNode(OperatorItemj);
+							leftNode=getRightNode(OperatorItemj);
+							System.out.println("left node and right node");
+						}
+					}
+					System.out.println("left node= "+leftNode.diplayTree());
+					System.out.println("right node= "+rightNode.diplayTree());
+					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
+					String operator=listOfTokens.get(OperatorItemj).getSymbol();
+					String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
+					node= new BinaryOperator(type,operator,leftNode,rightNode);
+					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node);
+				}
+				else if(isUnaryOperation(OperatorItemj)) {//not including ++ and += and others like that
+					Node childNode;
+					System.out.println("-------unary operator");
+					if(isRightNode(priorityListOfOperators,j)) {
+						System.out.println("child is node");
+						childNode=getRightNode(OperatorItemj);
 					}
 					else {
-						rightNode=getLeftNode(OperatorItemj);
-						leftNode=getRightNode(OperatorItemj);
-						System.out.println("left node and right node");
+						System.out.println("child is not node");
+						childNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
 					}
+					//System.out.println("Childnode= "+childNode.diplayTree());
+					String operator=listOfTokens.get(OperatorItemj).getSymbol();
+					String type=getTypeOfUnaryOperator(operator,childNode);
+					node= new UnaryOperator(type,operator,childNode);
+					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
+					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+					errorHandler.UnaryOperatorErrorCheck((UnaryOperator)node);
 				}
-				//System.out.println("left node= "+leftNode.diplayTree());
-				//System.out.println("right node= "+rightNode.diplayTree());
-				String operator=listOfTokens.get(OperatorItemj).getSymbol();
-				String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
-				node= new BinaryOperator(type,operator,leftNode,rightNode);
-				//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
-				ListOfNodes.add(Arrays.asList(OperatorItemj,node));
 				//System.out.println(ListOfNodes);
-				errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node);
 			}
 			
 			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
@@ -328,8 +381,8 @@ public class Parser {
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			//Token token=listOfTokens.get(i);
-			//token.showToken();
+			Token token=listOfTokens.get(i);
+			token.showToken();
 			//if no key word in the line , only expressions
 			parseExpression(i,errorHandler,"Semicolon");
 		}

@@ -6,6 +6,7 @@ import java.util.List;
 import language.jaha.lexer.Token;
 import language.jaha.nodes.BinaryOperator;
 import language.jaha.nodes.Node;
+import language.jaha.nodes.UnaryOperator;
 
 public class ErrorHandler {
 	
@@ -66,7 +67,13 @@ public class ErrorHandler {
 	
 	public void isSortedListNull(List<List<Object>> priorityListOfOperators) throws Exception {
 		if(priorityListOfOperators.isEmpty())
-			throw new Exception("ERROR: no binary operation found ");
+			throw new Exception("ERROR: no operator found ");
+	}
+	
+	
+	public void isExistingOperator(Token token) throws Exception {
+		if(token.getType().equals("error"))
+			throw new Exception("ERROR: operator not supported");
 	}
 	
 	public boolean isIdentifierInitialized(Node node) {
@@ -177,6 +184,21 @@ public class ErrorHandler {
 				}
 			}
 
+	}
+	
+	public void UnaryOperatorErrorCheck(UnaryOperator uo) throws Exception {
+		Node childNode=(Node)  uo.getChildNode();
+		 if(uo.getOperator().equals("!")) {
+				if(!childNode.getType().equals("Boolean")) {
+					throw new Exception("ERROR: Next token not boolean");
+				}
+		 }
+		 else if(uo.getOperator().equals("+") || uo.getOperator().equals("-")) {
+				if(!isTokenGeneralObject(childNode,true)) {
+					throw new Exception("ERROR: Next token not variable or parameter");
+				}
+				
+		 }
 	}
 	
 	

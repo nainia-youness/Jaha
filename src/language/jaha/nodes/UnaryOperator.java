@@ -6,34 +6,34 @@ public class UnaryOperator implements Node{
 	private String type;
 	private String operator;
 	
-	public UnaryOperator(Node value, String type, String operator) {
+	public UnaryOperator(String type, String operator,Node childNode) {
 		this.childNode = childNode;
 		this.type = type;
 		this.operator = operator;
 	}
 
 	public String diplayTree() {
-		return "Value:"; 
+		return "(child Node: "+operator+childNode.diplayTree()+" )"; 
 	}
 	
 	public Object eval() {
-		return null;
-		/*switch(operator) {
+		switch(operator) {
 			case "!":
-				return !(boolean)value.eval();
-				else
-					return null;
+				if(this.childNode.getType().equals("Boolean"))
+					return !((Boolean)this.childNode.eval());
+			case "+":
+				if(this.childNode.getType().equals("Integer"))
+					return +((Integer)this.childNode.eval());
+				else if(this.childNode.getType().equals("Double"))
+					return +((Double)this.childNode.eval());
 			case "-":
-				if(value.getClass().getName()=="java.lang.Integer")
-					return -(Integer)value;
-				else if(value.getClass().getName()=="java.lang.Double"){
-					return -(Double)value;
-				}
-				else
-					return null;
+				if(this.childNode.getType().equals("Integer"))
+					return -((Integer)this.childNode.eval());
+				else if(this.childNode.getType().equals("Double"))
+					return -((Double)this.childNode.eval());
 			default:
 				return null;
-		}*/
+		}
 	}
 	
 	public Object getChildNode() {

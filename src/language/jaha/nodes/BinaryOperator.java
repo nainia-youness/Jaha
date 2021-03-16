@@ -18,7 +18,6 @@ public class BinaryOperator implements Node{
 	}
 	
 	public Object eval() {
-		//return null;
 		switch(operator) {
 		case "+":
 			if(this.leftNode.getType().equals("Integer") && this.rightNode.getType().equals("Integer"))
