@@ -37,8 +37,8 @@ public class Lexer {
 	Arrays.asList("/","Op_divide"),
 	Arrays.asList("%","Op_mod"),
 	Arrays.asList("!","Op_not"),
-	Arrays.asList("&","Op_and"),
-	Arrays.asList("|","Op_or"),
+	Arrays.asList("&","Unary_Op_and"),
+	Arrays.asList("|","Unary_Op_or"),
 	Arrays.asList("++","Op_increment"),
 	Arrays.asList("--","Op_decrement"),
 	Arrays.asList("<","Op_less"),
@@ -92,7 +92,7 @@ public class Lexer {
 		}
 	}
 	
-	public Object[] isInLanguage(String s) {
+	private Object[] isInLanguage(String s) {
 		Object[] keyWord=new Object[2];  
 		if(s.equals("")) {
 			keyWord[0]=false;
@@ -109,7 +109,7 @@ public class Lexer {
 		return keyWord; 
 	}
 	
-	public Object[] containSpecialChar(String specialChar) {
+	private Object[] containSpecialChar(String specialChar) {
 		Object[] sc=new Object[2];  
 		String c;
 		for(int i=0;i<this.specialChars.size();i++) {
@@ -170,10 +170,8 @@ public class Lexer {
 	      line = line.substring(0, InlineComMatcher.end()-2);
 	    } 
 		String token="";
-		boolean isContinue;
 		for(int i=0;i<line.length();i++) {
 			token+=line.charAt(i);
-			isContinue=false;
 			List<Object> specialCharList=Arrays.asList(containSpecialChar(line.substring(i,i+1)));
 			String specialChar;
 			if((boolean) specialCharList.get(0)) {//is line[i] special char
@@ -181,22 +179,11 @@ public class Lexer {
 					{
 						specialCharList=Arrays.asList(containSpecialChar(line.substring(i,i+2)));
 						specialChar=line.substring(i,i+2);
-						isContinue=true;
+						token = token.substring(0, token.length() - 1);
+						i++;
 					}
 					else {
 						specialChar=line.substring(i,i+1);
-					}
-					if((boolean) containSpecialChar(token)[0]) {//is all the token a special character
-						specialCharList=Arrays.asList(containSpecialChar(token));
-						specialChar=token;
-						if(!specialCharList.get(1).equals("Tab") && !specialCharList.get(1).equals("Space")) {
-							Token t=new Token((String)specialCharList.get(1),row,i,specialChar);
-							listOfTokens.add(t);	
-						}
-						token="";
-						continue;
-					}
-					else {
 						token = token.substring(0, token.length() - 1);
 					}
 				if((boolean) isInLanguage(token)[0]) {
@@ -227,8 +214,11 @@ public class Lexer {
 							listOfTokens.add(t);
 						}
 						else {
-							Token t=new Token("Identifier",row,i,token);
-							listOfTokens.add(t);
+							if(!token.equals(" ") && !token.equals("	") && !token.equals("")) {
+								System.out.println("Identifier="+token);
+								Token t=new Token("Identifier",row,i,token);
+								listOfTokens.add(t);
+							}
 						}
 					}
 				}
@@ -238,13 +228,10 @@ public class Lexer {
 					listOfTokens.add(t);
 				}
 				token="";
-				if(isContinue) {
-					i++;
-				}
 			}
 			else {//for the strings
 				if(line.substring(i,i+1).equals("\"")) {
-				    Pattern stringPattern= Pattern.compile("\".*\"", Pattern.CASE_INSENSITIVE);
+				    Pattern stringPattern= Pattern.compile("\".*?\"", Pattern.CASE_INSENSITIVE);
 				    Matcher stringMatcher = stringPattern.matcher(line);
 				    boolean stringPatternFound = stringMatcher.find();
 				    if(stringPatternFound) {

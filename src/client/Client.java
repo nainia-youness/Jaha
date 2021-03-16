@@ -9,7 +9,7 @@ public class Client {
 		Lexer lexer=new Lexer();
 		//lexer.printCode();
 		lexer.tokenize();
-		//lexer.showTokens();
+		lexer.showTokens();
 		Parser parser=new Parser(lexer.getListOfTokens());
 		parser.parse();
 	}
