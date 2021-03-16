@@ -235,7 +235,7 @@ public class Lexer {
 				    Matcher stringMatcher = stringPattern.matcher(line);
 				    boolean stringPatternFound = stringMatcher.find();
 				    if(stringPatternFound) {
-						Token t=new Token("String",row,i+1,line.substring(stringMatcher.start(),stringMatcher.end()));
+						Token t=new Token("String",row,i+1,line.substring(stringMatcher.start()+1,stringMatcher.end()-1));
 						listOfTokens.add(t);
 				    	line = line.substring(0,stringMatcher.start())+line.substring(stringMatcher.end(),line.length());
 				    	token = token.substring(0, token.length() - 1);
