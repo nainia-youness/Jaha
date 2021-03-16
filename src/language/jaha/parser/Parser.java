@@ -134,6 +134,7 @@ public class Parser {
 	
 	
 	private void initialize() {
+		ListOfNodes.remove(0);
 		addedPriority=0;
 		for(int i=0;i<lineBinaryOperators.size();i++) {
 			lineBinaryOperators.remove(i);
