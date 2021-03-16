@@ -290,7 +290,6 @@ public class Parser {
 					rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
 				}
 				else {		
-					//getLeftVariableIndex(OperatorItemj)
 					if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
 						leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
 						rightNode=getRightNode(OperatorItemj);
@@ -321,6 +320,7 @@ public class Parser {
 			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
 			System.out.println(parsingTree.diplayTree());
 			System.out.println(parsingTree.eval());
+			listOfParsingTrees.add(parsingTree);
 			initialize();
 		}
 	}
