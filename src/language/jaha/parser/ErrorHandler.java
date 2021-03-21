@@ -175,6 +175,7 @@ public class ErrorHandler {
 					throw new Exception("ERROR: Previous token not variable or parameter");
 				}
 				else if(!isNumericalBinaryOperationTypeAllowed(leftNode,rightNode)) {
+					System.out.println(leftNode.getType()+"                      "+rightNode.getType());
 					throw new Exception("ERROR: Binary operation parameters not allowedd");
 				}
 				else if(!isIdentifierInitialized(leftNode)) {//should be defined

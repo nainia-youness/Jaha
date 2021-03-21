@@ -126,7 +126,7 @@ public class Parser {
 			return false;
 		if(this.listOfTokens.get(j).getSymbol().equals("-") || this.listOfTokens.get(j).getSymbol().equals("+"))
 		{
-			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier"))
+			if(this.listOfTokens.get(j-1).getType().equals("RightParen") || this.listOfTokens.get(j-1).getType().equals("Integer") || this.listOfTokens.get(j-1).getType().equals("Double") || this.listOfTokens.get(j-1).getType().equals("Identifier") || this.listOfTokens.get(j-1).getType().equals("String"))
 				return true;
 			else
 			{
