@@ -1,2 +1,2 @@
 # Jaha
-Jaha is is a General-purpose dynamically-typed programming language built with java and that works with frensh keywords 
+Jaha is is a General-purpose programming language with Type Inference . built with java and works with frensh keywords 
