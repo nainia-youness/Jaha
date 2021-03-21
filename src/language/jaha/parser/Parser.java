@@ -283,6 +283,8 @@ public class Parser {
 	private void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
+		if(token.getType().equals("Identifier"))
+			errorHandler.isAcceptableIdentifier(token);
 		if(!token.getType().equals(endType)) {
 			if(token.getType().equals("LeftParen"))
 			{

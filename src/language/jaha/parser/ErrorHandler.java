@@ -99,6 +99,7 @@ public class ErrorHandler {
 			else if(!leftNode.getType().equals("Identifier")) {
 				throw new Exception("ERROR: You cannot assign to a different type than an Identifier");
 			}
+			
 		}
 		else if(bo.getOperator().equals(">") || bo.getOperator().equals("<") || bo.getOperator().equals(">=") || bo.getOperator().equals("<=")) {
 			if(!isTokenGeneralObject(rightNode,true))
@@ -201,6 +202,9 @@ public class ErrorHandler {
 		 }
 	}
 	
+	public void isAcceptableIdentifier(Token token) throws Exception {
+		
+	}
 	
 	public void isRightParenthesExist(int i) throws Exception{
 		if(listOfTokens.get(i+1).getType().equals("Semicolon"))

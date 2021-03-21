@@ -2,10 +2,11 @@ package language.jaha.nodes;
 
 public class Identifier extends GeneralObject{
 	
-	private String type;
+	private String type="None";
 	private Object value;
 	private String symbol;
-	
+	//private String Identifier;
+
 	public Identifier(String type, Object value,String symbol) {
 		this.type = type;
 		this.value = value;
@@ -35,7 +36,7 @@ public class Identifier extends GeneralObject{
 	public void setType(String type) {
 		this.type = type;
 	}
-
+	
 	public Object getValue() {
 		return value;
 	}
