@@ -115,7 +115,7 @@ public class Parser {
 			go= new Variable(token.getType(),value);
 		}
 		else{//it s an identifier
-			go= new Identifier(token.getType(),token.getSymbol(),token.getSymbol());
+			go= new Identifier(token.getType(),null,token.getSymbol());
 		}
 		return go;
 	}
@@ -249,7 +249,7 @@ public class Parser {
 			if(leftNode.getType().equals("Double") || rightNode.getType().equals("Double"))
 				type="Double";
 			else {
-				type=leftNode.getType();
+				type=rightNode.getType();
 			}
 		}
 		return type;
@@ -283,8 +283,6 @@ public class Parser {
 	private void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
-		if(token.getType().equals("Identifier"))
-			errorHandler.isAcceptableIdentifier(token);
 		if(!token.getType().equals(endType)) {
 			if(token.getType().equals("LeftParen"))
 			{
@@ -346,9 +344,12 @@ public class Parser {
 					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
 					String operator=listOfTokens.get(OperatorItemj).getSymbol();
 					String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
+					
+					if(operator.equals("=")) {//doing Type Inference
+						leftNode.setType(type);
+					}
 					node= new BinaryOperator(type,operator,leftNode,rightNode);
 					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
-					errorHandler.BinaryOperatorErrorCheck((BinaryOperator)node);
 				}
 				else if(isUnaryOperation(OperatorItemj)) {//not including ++ and += and others like that
 					Node childNode;
@@ -367,14 +368,13 @@ public class Parser {
 					node= new UnaryOperator(type,operator,childNode);
 					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
 					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
-					errorHandler.UnaryOperatorErrorCheck((UnaryOperator)node);
 				}
 				//System.out.println(ListOfNodes);
 			}
 			
 			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
-			System.out.println(parsingTree.diplayTree());
 			System.out.println(parsingTree.eval());
+			System.out.println(parsingTree.diplayTree());
 			listOfParsingTrees.add(parsingTree);
 			initialize();
 		}

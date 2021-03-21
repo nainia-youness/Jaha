@@ -5,6 +5,7 @@ public class UnaryOperator implements Node{
 	private Node childNode;
 	private String type;
 	private String operator;
+	private Object value;
 	
 	public UnaryOperator(String type, String operator,Node childNode) {
 		this.childNode = childNode;
@@ -68,6 +69,14 @@ public class UnaryOperator implements Node{
 
 	public void setOperator(String operator) {
 		this.operator = operator;
+	}
+	
+	public Object getValue() {
+		return this.eval();
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
 	}
 
 

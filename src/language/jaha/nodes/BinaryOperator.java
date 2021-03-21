@@ -5,6 +5,7 @@ public class BinaryOperator implements Node{
 	private String operator;
 	private Node rightNode;//GeneralObject or BinaryOperator or a Unary operator
 	private Node leftNode;
+	private Object value;
 	
 	public BinaryOperator(String type, String operator, Node leftNode ,Node rightNode) {
 		this.type = type;
@@ -101,6 +102,7 @@ public class BinaryOperator implements Node{
 			if(this.leftNode.getType().equals("Boolean") && this.rightNode.getType().equals("Boolean"))
 				return (Boolean)this.leftNode.eval()||(Boolean)this.rightNode.eval();			
 		case "=":
+			leftNode.setValue((Object)this.rightNode.eval());
 			if(this.rightNode.getType().equals("Integer"))
 				return (Integer)this.rightNode.eval();
 			else if(this.rightNode.getType().equals("Double"))
@@ -145,4 +147,13 @@ public class BinaryOperator implements Node{
 	public void setLeftNode(Node leftNode) {
 		this.leftNode = leftNode;
 	}
+	
+	public Object getValue() {
+		return this.eval();
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+	
 }

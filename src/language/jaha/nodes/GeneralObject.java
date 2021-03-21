@@ -14,6 +14,6 @@ public abstract class GeneralObject implements Node{
 
 	public abstract Object getValue();
 
-	public abstract void setValue(Node value);
+	public abstract void setValue(Object value);
 
 }
