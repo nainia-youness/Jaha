@@ -50,7 +50,11 @@ public class Lexer {
 	Arrays.asList("{","LeftBrace"),
 	Arrays.asList("}","RightBrace"),
 	Arrays.asList("&&","Op_and"),
-	Arrays.asList("||","Op_or")
+	Arrays.asList("||","Op_or"),
+	Arrays.asList("+=","Op_add_assign"),
+	Arrays.asList("-=","Op_subtract_assign"),
+	Arrays.asList("*=","Op_multiply_assign"),
+	Arrays.asList("%=","Op_Op_mod_assign")
 	);
 	
 	

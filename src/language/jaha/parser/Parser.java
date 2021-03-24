@@ -50,13 +50,18 @@ public class Parser {
 			Arrays.asList("<=","Op_lessequal","9"),
 			Arrays.asList(">=","Op_greaterequal","9"),
 			Arrays.asList("&&","Op_and","4"),
-			Arrays.asList("||","Op_or","3")
+			Arrays.asList("||","Op_or","3"),
+			Arrays.asList("+=","Op_add_assign","1"),
+			Arrays.asList("-=","Op_subtract_assign","1"),
+			Arrays.asList("*=","Op_multiply_assign","1"),
+			Arrays.asList("%=","Op_Op_mod_assign","1")
 	);
 	
 		
 	
 	
 	private int getPriorityOfBinaryOp(String operator) {
+		System.out.println();
 		for(int i=0;i<binaryOperators.size();i++) {
 			if(operator.equals(binaryOperators.get(i).get(0))) {
 				return Integer.parseInt(binaryOperators.get(i).get(2));
@@ -351,9 +356,9 @@ public class Parser {
 					node= new BinaryOperator(type,operator,leftNode,rightNode);
 					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
 				}
-				else if(isUnaryOperation(OperatorItemj)) {//not including ++ and += and others like that
+				else if(isUnaryOperation(OperatorItemj)) {//not including i++
 					Node childNode;
-					System.out.println("-------unary operator");
+					System.out.println("-------unary operator");					
 					if(isRightNode(priorityListOfOperators,j)) {
 						System.out.println("child is node");
 						childNode=getRightNode(OperatorItemj);

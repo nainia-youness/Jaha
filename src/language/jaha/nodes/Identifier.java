@@ -13,7 +13,7 @@ public class Identifier extends GeneralObject{
 	}
 	
 	public String diplayTree() {
-		return "(identifier "+symbol+" /type: "+type+" value= "+value+")";//+this.value;
+		return "(Symbol: "+symbol+" /type: "+type+" /Value= "+value+")";//+this.value;
 	}
 	
 	public Object eval() {

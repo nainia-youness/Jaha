@@ -32,6 +32,15 @@ public class UnaryOperator implements Node{
 					return -((Integer)this.childNode.eval());
 				else if(this.childNode.getType().equals("Double"))
 					return -((Double)this.childNode.eval());
+			case "++":
+				if(this.childNode.getType().equals("Integer")) {
+					childNode.setValue((Integer)childNode.getValue()+1);
+					return (Integer)this.childNode.eval();
+				}	
+				else if(this.childNode.getType().equals("Double")) {
+					childNode.setValue((Double)childNode.getValue()+1);
+					return (Double)this.childNode.eval();
+				}
 			default:
 				return null;
 		}
