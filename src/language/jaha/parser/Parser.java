@@ -7,6 +7,7 @@ import java.util.List;
 
 import language.jaha.lexer.Token;
 import language.jaha.nodes.BinaryOperator;
+import language.jaha.nodes.CodeBlock;
 import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
@@ -158,11 +159,7 @@ public class Parser {
 	private void initialize() {
 		ListOfNodes.remove(0);
 		addedPriority=0;
-		for(int i=0;i<lineOfOperators.size();i++) {
-			lineOfOperators.remove(i);
-		}
-		if(lineOfOperators.size()>1)
-			lineOfOperators.remove(0);
+		lineOfOperators=new ArrayList<> (Arrays.asList());
 	}
 	
 	
@@ -288,11 +285,11 @@ public class Parser {
 		Token token=listOfTokens.get(i);
 		if(token.getType().equals("LeftParen"))
 		{
-			errorHandler.isRightParenthesExist(i);
+			errorHandler.isRightTokenExist(i,"RightParen","LeftParen",true);
 			addedPriority+=30;
 		}
 		else if(token.getType().equals("RightParen")) {
-			errorHandler.isLeftParenthesExist(i);
+			errorHandler.isLeftTokenExist(i,"RightParen","LeftParen",true);
 			addedPriority-=30;
 		}
 		int priority;
@@ -372,10 +369,10 @@ public class Parser {
 	}
 	
 	
-	private void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
+	private void parseExpression(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
-		if(!token.getType().equals(endType)) {
+		if(!token.getType().equals("Semicolon")) {
 			 addTolineOfOperators(i,errorHandler);
 		}
 		else {//you have reached the semicolon for example
@@ -401,14 +398,54 @@ public class Parser {
 		}
 	}
 	
+	private int findStartBlockIndex(int i) {
+		for(int j=listOfParsingTrees.size()-1;j>=0;j--) {
+			if(listOfParsingTrees.get(j).getClass().getName().equals("language.jaha.nodes.CodeBlock")) {
+				if(listOfParsingTrees.get(j).eval()==null) {
+					return j;
+				}
+			}
+		}
+		return -1;//EROOR
+	}
+	
+	
+	private void deleteNodesOfBlock(int blockStartIndex) {
+		int nbtOfNodesToDelete=listOfParsingTrees.size()-blockStartIndex-1;
+		System.out.println(nbtOfNodesToDelete);
+		for(int i=0;i<nbtOfNodesToDelete;i++) {
+			listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+		}
+	}
+	
+	private void parseCodeBlock(int i,ErrorHandler errorHandler) throws Exception {
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("LeftBrace")) {
+			errorHandler.isRightTokenExist(i,"RightBrace","LeftBrace",false);
+			CodeBlock block=new CodeBlock();
+			listOfParsingTrees.add(block);
+		}
+		else if(token.getType().equals("RightBrace")) {
+			errorHandler.isLeftTokenExist(i,"RightBrace","LeftBrace",false);
+			int blockStartIndex=findStartBlockIndex(i);
+			CodeBlock block=(CodeBlock)listOfParsingTrees.get(blockStartIndex);
+			for(int j=blockStartIndex+1;j<listOfParsingTrees.size();j++) {
+				block.addExpression(listOfParsingTrees.get(j));
+			}
+			deleteNodesOfBlock(blockStartIndex);
+		}
+	}
+	
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			Token token=listOfTokens.get(i);
-			token.showToken();
-			//if no key word in the line , only expressions
-			parseExpression(i,errorHandler,"Semicolon");
+			//Token token=listOfTokens.get(i);
+			//token.showToken();
+			parseCodeBlock(i,errorHandler);
+			parseExpression(i,errorHandler);
 		}
-		//System.out.println(listOfParsingTrees);
+		System.out.println("...................................................");
+		System.out.println(listOfParsingTrees);
+		System.out.println(listOfParsingTrees.get(0).diplayTree());
 	}
 }

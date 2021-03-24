@@ -8,16 +8,22 @@ public class CodeBlock implements Node{
 	
 	private List<Node> expressions=new ArrayList<> ();
 	
+	public CodeBlock() {}
+
 	@Override
 	public Object eval() {
-		// TODO Auto-generated method stub
+		if(expressions.size()==0)
+			return null;
 		return null;
 	}
 
 	@Override
 	public String diplayTree() {
-		// TODO Auto-generated method stub
-		return null;
+		String tree="";
+		for(int i=0;i<expressions.size();i++) {
+			tree+="(Exp: "+expressions.get(i).diplayTree()+" )";
+		}
+		return tree;
 	}
 	
 	public List<Node> getExpressions() {
@@ -26,5 +32,9 @@ public class CodeBlock implements Node{
 
 	public void setExpressions(List<Node> expressions) {
 		this.expressions = expressions;
+	}
+	
+	public void addExpression(Node expression) {
+		expressions.add(expression);
 	}
 }
