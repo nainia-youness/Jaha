@@ -126,7 +126,7 @@ public class Parser {
 	}
 	
 	
-	public boolean isBinaryOperation(int j) {
+	private boolean isBinaryOperation(int j) {
 		if(j==0)
 			return false;
 		if(this.listOfTokens.get(j).getSymbol().equals("-") || this.listOfTokens.get(j).getSymbol().equals("+"))
@@ -145,7 +145,7 @@ public class Parser {
 		return false;
 	}
 	
-	public boolean isUnaryOperation(int j) {
+	private boolean isUnaryOperation(int j) {
 		for(int i=0;i<unaryOperators.size();i++) {
 			if(this.listOfTokens.get(j).getSymbol().equals(unaryOperators.get(i).get(0)))
 				return true;
@@ -284,32 +284,99 @@ public class Parser {
 		return 0;//ERROR!
 	}
 	
+	private void addTolineOfOperators(int i,ErrorHandler errorHandler)throws Exception {
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("LeftParen"))
+		{
+			errorHandler.isRightParenthesExist(i);
+			addedPriority+=30;
+		}
+		else if(token.getType().equals("RightParen")) {
+			errorHandler.isLeftParenthesExist(i);
+			addedPriority-=30;
+		}
+		int priority;
+		if(isBinaryOperation(i)) {
+			priority=getPriorityOfBinaryOp(token.getSymbol());
+			priority+=addedPriority;
+			List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
+			lineOfOperators.add(bo);
+		}
+		else if(isUnaryOperation(i)) {
+			priority=getPriorityOfUnaryOp(token.getSymbol());
+			priority+=addedPriority;
+			List<Object> uo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
+			lineOfOperators.add(uo);
+		}
+	}
+	
+	
+	private ExpressionNode addBinaryOperatorNode(List<List<Object>> priorityListOfOperators,int OperatorItemj,int j) {
+		System.out.println("-------binary operator");
+		ExpressionNode leftNode;
+		ExpressionNode rightNode;
+		if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
+			leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
+			rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
+		}
+		else {		
+			if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
+				leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
+				rightNode=getRightNode(OperatorItemj);
+				System.out.println("left not node and right node");
+			}
+			else if(isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)){
+				leftNode=getLeftNode(OperatorItemj);
+				rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
+				System.out.println("left node and right not node");
+			}
+			else {
+				rightNode=getLeftNode(OperatorItemj);
+				leftNode=getRightNode(OperatorItemj);
+				System.out.println("left node and right node");
+			}
+		}
+		System.out.println("left node= "+leftNode.diplayTree());
+		System.out.println("right node= "+rightNode.diplayTree());
+		//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
+		String operator=listOfTokens.get(OperatorItemj).getSymbol();
+		String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
+		
+		if(operator.equals("=")) {//doing Type Inference
+			leftNode.setType(type);
+		}
+		ExpressionNode node= new BinaryOperator(type,operator,leftNode,rightNode);
+		ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+		return node;
+	}
+	
+	
+	private ExpressionNode addUnaryOperatorNode(List<List<Object>> priorityListOfOperators,int OperatorItemj,int j) {
+		ExpressionNode childNode;
+		System.out.println("-------unary operator");					
+		if(isRightNode(priorityListOfOperators,j)) {
+			System.out.println("child is node");
+			childNode=getRightNode(OperatorItemj);
+		}
+		else {
+			System.out.println("child is not node");
+			childNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
+		}
+		//System.out.println("Childnode= "+childNode.diplayTree());
+		String operator=listOfTokens.get(OperatorItemj).getSymbol();
+		String type=getTypeOfUnaryOperator(operator,childNode);
+		ExpressionNode node= new UnaryOperator(type,operator,childNode);
+		//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
+		ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+		return node;
+	}
+	
+	
 	private void parseExpression(int i,ErrorHandler errorHandler,String endType) throws Exception {
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
 		if(!token.getType().equals(endType)) {
-			if(token.getType().equals("LeftParen"))
-			{
-				errorHandler.isRightParenthesExist(i);
-				addedPriority+=30;
-			}
-			else if(token.getType().equals("RightParen")) {
-				errorHandler.isLeftParenthesExist(i);
-				addedPriority-=30;
-			}
-			int priority;
-			if(isBinaryOperation(i)) {
-				priority=getPriorityOfBinaryOp(token.getSymbol());
-				priority+=addedPriority;
-				List<Object> bo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
-				lineOfOperators.add(bo);
-			}
-			else if(isUnaryOperation(i)) {
-				priority=getPriorityOfUnaryOp(token.getSymbol());
-				priority+=addedPriority;
-				List<Object> uo=new ArrayList<> (Arrays.asList(token.getSymbol(),i,priority));
-				lineOfOperators.add(uo);
-			}
+			 addTolineOfOperators(i,errorHandler);
 		}
 		else {//you have reached the semicolon for example
 			List<List<Object>> priorityListOfOperators=sortListByPriority();
@@ -319,63 +386,13 @@ public class Parser {
 				ExpressionNode node;
 				int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
 				if(isBinaryOperation(OperatorItemj)) {
-					System.out.println("-------binary operator");
-					ExpressionNode leftNode;
-					ExpressionNode rightNode;
-					if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
-						leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
-						rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-					}
-					else {		
-						if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
-							leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
-							rightNode=getRightNode(OperatorItemj);
-							System.out.println("left not node and right node");
-						}
-						else if(isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)){
-							leftNode=getLeftNode(OperatorItemj);
-							rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-							System.out.println("left node and right not node");
-						}
-						else {
-							rightNode=getLeftNode(OperatorItemj);
-							leftNode=getRightNode(OperatorItemj);
-							System.out.println("left node and right node");
-						}
-					}
-					System.out.println("left node= "+leftNode.diplayTree());
-					System.out.println("right node= "+rightNode.diplayTree());
-					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
-					String operator=listOfTokens.get(OperatorItemj).getSymbol();
-					String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
-					
-					if(operator.equals("=")) {//doing Type Inference
-						leftNode.setType(type);
-					}
-					node= new BinaryOperator(type,operator,leftNode,rightNode);
-					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+					node=addBinaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
 				}
 				else if(isUnaryOperation(OperatorItemj)) {//not including i++
-					ExpressionNode childNode;
-					System.out.println("-------unary operator");					
-					if(isRightNode(priorityListOfOperators,j)) {
-						System.out.println("child is node");
-						childNode=getRightNode(OperatorItemj);
-					}
-					else {
-						System.out.println("child is not node");
-						childNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-					}
-					//System.out.println("Childnode= "+childNode.diplayTree());
-					String operator=listOfTokens.get(OperatorItemj).getSymbol();
-					String type=getTypeOfUnaryOperator(operator,childNode);
-					node= new UnaryOperator(type,operator,childNode);
-					//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
-					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
+					node=addUnaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
 				}
 				//System.out.println(ListOfNodes);
 			}
-			
 			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
 			System.out.println(parsingTree.eval());
 			System.out.println(parsingTree.diplayTree());
