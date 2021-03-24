@@ -1,6 +1,6 @@
 package language.jaha.nodes;
 
-public abstract class GeneralObject implements Node{
+public abstract class GeneralObject extends ExpressionNode{
 
 	private String type;
 	private Object value;

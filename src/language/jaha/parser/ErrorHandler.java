@@ -5,6 +5,7 @@ import java.util.List;
 
 import language.jaha.lexer.Token;
 import language.jaha.nodes.BinaryOperator;
+import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.Node;
 import language.jaha.nodes.UnaryOperator;
 
@@ -16,7 +17,7 @@ public class ErrorHandler {
 	}
 	
 	
-	public boolean isTokenGeneralObject(Node node,boolean isRightNode) {
+	public boolean isTokenGeneralObject(ExpressionNode node,boolean isRightNode) {
 		boolean isTokenGeneralObject= node.getType().equals("Integer") || node.getType().equals("Double") || node.getType().equals("Identifier") || node.getType().equals("Boolean") || node.getType().equals("String");
 		if(isRightNode) {
 			return node.getType().equals("LeftParen") || isTokenGeneralObject;
@@ -27,7 +28,7 @@ public class ErrorHandler {
 		//this is just for leaf nodes MUST BE UPDATED!
 	}
 	
-	public boolean isBooleanBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
+	public boolean isBooleanBinaryOperationTypeAllowed(ExpressionNode leftNode,ExpressionNode rightNode) {
 		if(leftNode.getType().equals("Boolean") && rightNode.getType().equals("Boolean"))
 			return true;
 		else if(leftNode.getType().equals("Identifier") && rightNode.getType().equals("Boolean"))
@@ -37,7 +38,7 @@ public class ErrorHandler {
 		return false;
 	}
 	
-	public boolean isNumericalBinaryOperationTypeAllowed(Node leftNode,Node rightNode) {
+	public boolean isNumericalBinaryOperationTypeAllowed(ExpressionNode leftNode,ExpressionNode rightNode) {
 		if(leftNode.getType().equals("Integer") && rightNode.getType().equals("Integer"))
 			return true;
 		else if(leftNode.getType().equals("Double") && rightNode.getType().equals("Double"))
@@ -76,7 +77,7 @@ public class ErrorHandler {
 			throw new Exception("ERROR: operator not supported");
 	}
 	
-	public boolean isIdentifierInitialized(Node node) {
+	public boolean isIdentifierInitialized(ExpressionNode node) {
 		if(node.getType().equals("Identifier")){
 			return true;
 		}
@@ -84,8 +85,8 @@ public class ErrorHandler {
 	}
 	
 	public void BinaryOperatorErrorCheck(BinaryOperator bo) throws Exception {
-		Node leftNode=(Node)  bo.getLeftNode();
-		Node rightNode=(Node) bo.getRightNode();
+		ExpressionNode leftNode=(ExpressionNode)  bo.getLeftNode();
+		ExpressionNode rightNode=(ExpressionNode) bo.getRightNode();
 		if(bo.getOperator().equals("=")) {
 			if(!isTokenGeneralObject(rightNode,true)) {
 				throw new Exception("ERROR: Next token not variable or parameter");
@@ -188,7 +189,7 @@ public class ErrorHandler {
 	}
 	
 	public void UnaryOperatorErrorCheck(UnaryOperator uo) throws Exception {
-		Node childNode=(Node)  uo.getChildNode();
+		ExpressionNode childNode=(ExpressionNode)  uo.getChildNode();
 		 if(uo.getOperator().equals("!")) {
 				if(!childNode.getType().equals("Boolean")) {
 					throw new Exception("ERROR: Next token not boolean");

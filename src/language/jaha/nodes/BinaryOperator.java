@@ -1,13 +1,13 @@
 package language.jaha.nodes;
 
-public class BinaryOperator implements Node{
+public class BinaryOperator extends ExpressionNode{
 	private String type;
 	private String operator;
-	private Node rightNode;//GeneralObject or BinaryOperator or a Unary operator
-	private Node leftNode;
+	private ExpressionNode rightNode;//GeneralObject or BinaryOperator or a Unary operator
+	private ExpressionNode leftNode;
 	private Object value;
 	
-	public BinaryOperator(String type, String operator, Node leftNode ,Node rightNode) {
+	public BinaryOperator(String type, String operator, ExpressionNode leftNode ,ExpressionNode rightNode) {
 		this.type = type;
 		this.operator = operator;
 		this.rightNode = rightNode;
@@ -206,19 +206,19 @@ public class BinaryOperator implements Node{
 		this.operator = operator;
 	}
 
-	public Object getRightNode() {
+	public ExpressionNode getRightNode() {
 		return rightNode;
 	}
 
-	public void setRightNode(Node rightNode) {
+	public void setRightNode(ExpressionNode rightNode) {
 		this.rightNode = rightNode;
 	}
 
-	public Object getLeftNode() {
+	public ExpressionNode getLeftNode() {
 		return leftNode;
 	}
 
-	public void setLeftNode(Node leftNode) {
+	public void setLeftNode(ExpressionNode leftNode) {
 		this.leftNode = leftNode;
 	}
 	

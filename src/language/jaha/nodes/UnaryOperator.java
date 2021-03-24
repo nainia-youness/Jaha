@@ -1,13 +1,13 @@
 package language.jaha.nodes;
 
-public class UnaryOperator implements Node{
+public class UnaryOperator extends ExpressionNode{
 
-	private Node childNode;
+	private ExpressionNode childNode;
 	private String type;
 	private String operator;
 	private Object value;
 	
-	public UnaryOperator(String type, String operator,Node childNode) {
+	public UnaryOperator(String type, String operator,ExpressionNode childNode) {
 		this.childNode = childNode;
 		this.type = type;
 		this.operator = operator;
@@ -46,13 +46,13 @@ public class UnaryOperator implements Node{
 		}
 	}
 	
-	public Object getChildNode() {
+	public ExpressionNode getChildNode() {
 		return childNode;
 	}
 
 
 
-	public void setChildNode(Node childNode) {
+	public void setChildNode(ExpressionNode childNode) {
 		this.childNode = childNode;
 	}
 

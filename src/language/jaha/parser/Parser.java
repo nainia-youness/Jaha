@@ -7,6 +7,7 @@ import java.util.List;
 
 import language.jaha.lexer.Token;
 import language.jaha.nodes.BinaryOperator;
+import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
 import language.jaha.nodes.Node;
@@ -61,7 +62,6 @@ public class Parser {
 	
 	
 	private int getPriorityOfBinaryOp(String operator) {
-		System.out.println();
 		for(int i=0;i<binaryOperators.size();i++) {
 			if(operator.equals(binaryOperators.get(i).get(0))) {
 				return Integer.parseInt(binaryOperators.get(i).get(2));
@@ -99,7 +99,7 @@ public class Parser {
 	
 	
 	
-	private Node createGeneralObjectNode(int i) {
+	private ExpressionNode createGeneralObjectNode(int i) {
 		Token token=listOfTokens.get(i); 
 		GeneralObject go;
 		if(token.getType().equals("Integer")) {
@@ -122,7 +122,7 @@ public class Parser {
 		else{//it s an identifier
 			go= new Identifier(token.getType(),null,token.getSymbol());
 		}
-		return go;
+		return (ExpressionNode)go;
 	}
 	
 	
@@ -212,7 +212,7 @@ public class Parser {
 	}
 	
 	
-	private Node getLeftNode(int OperatorItemj) {//return the node with the minimum index bigger than OperatorItemj
+	private ExpressionNode getLeftNode(int OperatorItemj) {//return the node with the minimum index bigger than OperatorItemj
 		if(ListOfNodes.size()==0) return null;
 		int maxIndex=0;
 		int j=0;
@@ -223,12 +223,12 @@ public class Parser {
 				j=i;
 			}
 		}
-		Node node=(Node)ListOfNodes.get(j).get(1);
+		ExpressionNode node=(ExpressionNode)ListOfNodes.get(j).get(1);
 		ListOfNodes.remove(j);
 		return node;
 	}
 	
-	private Node getRightNode(int OperatorItemj) {//return the node with the maximum index smaller than OperatorItemj
+	private ExpressionNode getRightNode(int OperatorItemj) {//return the node with the maximum index smaller than OperatorItemj
 		if(ListOfNodes.size()==0) return null;
 		int minIndex=1000000;
 		int j=0;
@@ -238,12 +238,12 @@ public class Parser {
 				j=i;
 			}
 		}
-		Node node=(Node)ListOfNodes.get(j).get(1);
+		ExpressionNode node=(ExpressionNode)ListOfNodes.get(j).get(1);
 		ListOfNodes.remove(j);
 		return node;
 	}
 	
-	private String getTypeOfBinaryOperator(String operator,Node leftNode,Node rightNode){
+	private String getTypeOfBinaryOperator(String operator,ExpressionNode leftNode,ExpressionNode rightNode){
 		String type;
 		if(operator.equals("/"))
 			type="Double";
@@ -260,8 +260,7 @@ public class Parser {
 		return type;
 	}
 	
-	private String getTypeOfUnaryOperator(String operator,Node childNode){
-		String type;
+	private String getTypeOfUnaryOperator(String operator,ExpressionNode childNode){
 		return childNode.getType();
 	}
 	
@@ -317,12 +316,12 @@ public class Parser {
 			System.out.println(priorityListOfOperators);
 			errorHandler.isSortedListNull(priorityListOfOperators);
 			for(int j=0;j<priorityListOfOperators.size();j++) {
-				Node node;
+				ExpressionNode node;
 				int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
 				if(isBinaryOperation(OperatorItemj)) {
 					System.out.println("-------binary operator");
-					Node leftNode;
-					Node rightNode;
+					ExpressionNode leftNode;
+					ExpressionNode rightNode;
 					if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
 						leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
 						rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
@@ -357,7 +356,7 @@ public class Parser {
 					ListOfNodes.add(Arrays.asList(OperatorItemj,node));
 				}
 				else if(isUnaryOperation(OperatorItemj)) {//not including i++
-					Node childNode;
+					ExpressionNode childNode;
 					System.out.println("-------unary operator");					
 					if(isRightNode(priorityListOfOperators,j)) {
 						System.out.println("child is node");
