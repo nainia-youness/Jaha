@@ -382,23 +382,34 @@ public class Parser {
 		else {//you have reached the semicolon for example
 			List<List<Object>> priorityListOfOperators=sortListByPriority();
 			System.out.println(priorityListOfOperators);
-			errorHandler.isSortedListNull(priorityListOfOperators);
-			for(int j=0;j<priorityListOfOperators.size();j++) {
-				ExpressionNode node;
-				int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
-				if(isBinaryOperation(OperatorItemj)) {
-					node=addBinaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
+			ExpressionNode node;
+			if(priorityListOfOperators.size()==0) {
+				if(priorityListOfOperators.size()<=(getLeftVariableIndex(i))) {
+					node=createGeneralObjectNode(getLeftVariableIndex(i));
+					listOfParsingTrees.add(node);
 				}
-				else if(isUnaryOperation(OperatorItemj)) {//not including i++
-					node=addUnaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
-				}
-				//System.out.println(ListOfNodes);
 			}
-			Node parsingTree=(Node)ListOfNodes.get(0).get(1);
-			System.out.println(parsingTree.eval());
-			System.out.println(parsingTree.diplayTree());
-			listOfParsingTrees.add(parsingTree);
-			initialize();
+			else {
+				errorHandler.isSortedListNull(priorityListOfOperators);
+				for(int j=0;j<priorityListOfOperators.size();j++) {
+					int OperatorItemj=(Integer)priorityListOfOperators.get(j).get(1);
+					if(isBinaryOperation(OperatorItemj)) {
+						node=addBinaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
+					}
+					else if(isUnaryOperation(OperatorItemj)) {//not including i++
+						node=addUnaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
+					}
+					//System.out.println(ListOfNodes);
+				}
+				System.out.println(ListOfNodes);
+				Node parsingTree=(Node)ListOfNodes.get(0).get(1);
+				System.out.println(parsingTree.eval());
+				System.out.println(parsingTree.diplayTree());
+				listOfParsingTrees.add(parsingTree);
+				initialize();
+			}
+
+			
 		}
 	}
 	
@@ -503,7 +514,6 @@ public class Parser {
 			endToken="LeftBrace";
 			List<Object> ifStartIndexList=Arrays.asList(listOfParsingTrees.size()-1,isElseExist(i));
 			ifStartIndexes.add(ifStartIndexList);
-			
 		}
 		if(ifStartIndexes.size()!=0) {
 			int ifStartIndex=(Integer)(ifStartIndexes.get(ifStartIndexes.size()-1).get(0));
