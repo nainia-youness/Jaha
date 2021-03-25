@@ -19,9 +19,9 @@ public class IfNode implements Node{
 
 	@Override
 	public String diplayTree() {
-		String displayTree="if( "+condition.diplayTree()+" ) do { "+ifCodeblock.diplayTree()+" }";
+		String displayTree="\nif( "+condition.diplayTree()+" ) do \n{ "+ifCodeblock.diplayTree()+" }";
 		if(elseCodeblock!=null){
-			displayTree+="else do{ "+elseCodeblock.diplayTree()+" }";
+			displayTree+="\nelse do\n{ "+elseCodeblock.diplayTree()+" }";
 		}
 		return  displayTree;
 	}
