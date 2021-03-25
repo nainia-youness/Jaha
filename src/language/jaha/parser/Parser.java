@@ -26,10 +26,8 @@ public class Parser {
 	int addedPriority=0;
 	List<List<Object>> ListOfNodes=new ArrayList<> (Arrays.asList());
 	private String endToken="Semicolon";
-	int ifStartIndex=-50;
-	boolean isElse=false;
-	boolean isIf=false;
-	
+	List<List<Object>> ifStartIndexes=new ArrayList<> (Arrays.asList());
+	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	
 	public Parser(List<Token> listOfTokens) {
 		this.listOfTokens=listOfTokens;
@@ -375,6 +373,7 @@ public class Parser {
 	
 	
 	private void parseExpression(int i,ErrorHandler errorHandler) throws Exception {
+		System.out.println(endToken);
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
 		if(!token.getType().equals(endToken)) {
@@ -404,6 +403,9 @@ public class Parser {
 	}
 	
 	private int findStartBlockIndex(int i) {
+		boolean isLastNodeAndTheNodeBeforeBlockNodes=listOfParsingTrees.get(listOfParsingTrees.size()-1).getClass().getName().equals("language.jaha.nodes.CodeBlock") && listOfParsingTrees.get(listOfParsingTrees.size()-2).getClass().getName().equals("language.jaha.nodes.CodeBlock");
+		if(isLastNodeAndTheNodeBeforeBlockNodes)
+			return listOfParsingTrees.size()-2;
 		for(int j=listOfParsingTrees.size()-1;j>=0;j--) {
 			if(listOfParsingTrees.get(j).getClass().getName().equals("language.jaha.nodes.CodeBlock")) {
 				if(listOfParsingTrees.get(j).eval()==null) {
@@ -417,46 +419,98 @@ public class Parser {
 	
 	private void deleteNodesOfBlock(int blockStartIndex) {
 		int nbtOfNodesToDelete=listOfParsingTrees.size()-blockStartIndex-1;
-		System.out.println(nbtOfNodesToDelete);
 		for(int i=0;i<nbtOfNodesToDelete;i++) {
 			listOfParsingTrees.remove(listOfParsingTrees.size()-1);
 		}
+		System.out.println(listOfParsingTrees);
 	}
+	
+	private int getIndexOfRightBrace(int i) {
+		int nbrLeftBraces=0;
+		int nbrRightBraces=0;
+		int rightBraceIndex=0;
+		for(int j=i;j<listOfTokens.size();j++) {
+			rightBraceIndex=j;
+			if(listOfTokens.get(j).getType().equals("LeftBrace")) {//LeftParen
+				nbrLeftBraces++;
+			}
+			if(listOfTokens.get(j).getType().equals("RightBrace")) {
+					nbrRightBraces++;
+			}
+			if(nbrLeftBraces!=0 && (nbrLeftBraces==nbrRightBraces))
+				break;
+		}
+		System.out.println(rightBraceIndex);
+		return rightBraceIndex; 
+	}
+	
+
 	
 	private void parseCodeBlock(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
+		System.out.println(listOfRightBraceIndexes);
 		if(token.getType().equals("LeftBrace")) {
 			endToken="Semicolon";
 			errorHandler.isRightTokenExist(i,"RightBrace","LeftBrace",false);
 			CodeBlock block=new CodeBlock();
+			listOfRightBraceIndexes.add(getIndexOfRightBrace(i));
 			listOfParsingTrees.add(block);
 		}
-		else if(token.getType().equals("RightBrace")) {
-			errorHandler.isLeftTokenExist(i,"RightBrace","LeftBrace",false);
-			int blockStartIndex=findStartBlockIndex(i);
-			CodeBlock block=(CodeBlock)listOfParsingTrees.get(blockStartIndex);
-			for(int j=blockStartIndex+1;j<listOfParsingTrees.size();j++) {
-				block.addExpression(listOfParsingTrees.get(j));
+		if(listOfRightBraceIndexes.size()!=0){
+			if(i==listOfRightBraceIndexes.get(listOfRightBraceIndexes.size()-1)) {
+				errorHandler.isLeftTokenExist(i,"RightBrace","LeftBrace",false);
+				int blockStartIndex=findStartBlockIndex(i);
+				System.out.println("blockStartIndex: "+blockStartIndex);
+				CodeBlock block=(CodeBlock)listOfParsingTrees.get(blockStartIndex);
+				for(int j=blockStartIndex+1;j<listOfParsingTrees.size();j++) {
+					block.addExpression(listOfParsingTrees.get(j));
+				}
+				deleteNodesOfBlock(blockStartIndex);
+				listOfRightBraceIndexes.remove(listOfRightBraceIndexes.size()-1);
 			}
-			deleteNodesOfBlock(blockStartIndex);
 		}
 	}
 	
 	
-	private void parseIfNode(int i,ErrorHandler errorHandler) throws Exception {//TODO: if there is nested ifs, he only remembers the last one(use array)
-		System.out.println(ifStartIndex);
+	private boolean isElseExist(int i) {
+		int nbrLeftBraces=0;
+		int nbrRightBraces=0;
+		int elseIndex=0;
+		for(int j=i;j<listOfTokens.size();j++) {
+			elseIndex=j;
+			if(listOfTokens.get(j).getType().equals("LeftBrace")) {//LeftParen
+				nbrLeftBraces++;
+			}
+			if(listOfTokens.get(j).getType().equals("RightBrace")) {
+					nbrRightBraces++;
+			}
+			if(nbrLeftBraces!=0 && (nbrLeftBraces==nbrRightBraces))
+				break;
+		}
+		if(elseIndex+1>=listOfTokens.size())
+			return false;
+		if(listOfTokens.get(elseIndex+1).getType().equals("Keyword_else"))
+			return true;
+		return false;
+	}
+	
+	
+	private void parseIfNode(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(token.getType().equals("Keyword_if")) {
 			IfNode ifNode= new IfNode();
 			listOfParsingTrees.add(ifNode);
 			endToken="LeftBrace";
-			ifStartIndex=i;
-			isIf=true;
+			List<Object> ifStartIndexList=Arrays.asList(listOfParsingTrees.size()-1,isElseExist(i));
+			ifStartIndexes.add(ifStartIndexList);
+			
 		}
-		else if(isIf) {
+		if(ifStartIndexes.size()!=0) {
+			int ifStartIndex=(Integer)(ifStartIndexes.get(ifStartIndexes.size()-1).get(0));
 			if(listOfParsingTrees.size()-1-ifStartIndex==2)//if after the ifNode , there is only the expression and the blockNode
 			{
 				if(listOfParsingTrees.get(ifStartIndex+2).getClass().getName().equals("language.jaha.nodes.CodeBlock")) {
+					
 					if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+2)).getExpressions().isEmpty()) {
 						ExpressionNode exp=(ExpressionNode)listOfParsingTrees.get(ifStartIndex+1);
 						CodeBlock block=(CodeBlock)listOfParsingTrees.get(ifStartIndex+2);
@@ -464,26 +518,23 @@ public class Parser {
 						((IfNode)listOfParsingTrees.get(ifStartIndex)).setIfCodeblock(block);
 						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
 						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
-						isIf=false;
+						 if((Boolean)(ifStartIndexes.get(ifStartIndexes.size()-1).get(1))==false)
+						 	ifStartIndexes.remove(ifStartIndexes.size()-1);
 					}
 				}
 			}
 		}
-		
-		if(token.getType().equals("Keyword_else")) {
-			//see if there is a previous if node if not raize error
-			isElse=true;
-		}
-		if(isElse) {
-			System.out.println("add the else node.............................................1   "+ifStartIndex);
-			if(listOfParsingTrees.size()-1-ifStartIndex==1) {//if after the ifNode , there is only the blockNode
-				System.out.println("add the else node.............................................2");
-				if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+1)).getExpressions().isEmpty()) {
-					System.out.println("add the else node.............................................");
-					CodeBlock elseBlock=(CodeBlock)listOfParsingTrees.get(ifStartIndex+1);
-					((IfNode)listOfParsingTrees.get(ifStartIndex)).setElseCodeblock(elseBlock);
-					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
-					isElse=false;
+		if(ifStartIndexes.size()!=0) {
+			int ifStartIndex=(Integer)(ifStartIndexes.get(ifStartIndexes.size()-1).get(0));
+			System.out.println(ifStartIndexes.size()-1+" "+ifStartIndexes);
+			if((Boolean)(ifStartIndexes.get(ifStartIndexes.size()-1).get(1))==true) {
+				if(listOfParsingTrees.size()-1-ifStartIndex==1) {//if after the ifNode , there is only the blockNode
+					if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+1)).getExpressions().isEmpty()) {
+						CodeBlock elseBlock=(CodeBlock)listOfParsingTrees.get(ifStartIndex+1);
+						((IfNode)listOfParsingTrees.get(ifStartIndex)).setElseCodeblock(elseBlock);
+						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+						ifStartIndexes.remove(ifStartIndexes.size()-1);
+					}
 				}
 			}
 		}
@@ -499,8 +550,10 @@ public class Parser {
 			parseExpression(i,errorHandler);//the order of the parsers is important
 			parseCodeBlock(i,errorHandler);
 			parseIfNode(i,errorHandler);
+			
 		}
 		System.out.println("...................................................");
+		System.out.println(ifStartIndexes);
 		System.out.println(listOfParsingTrees);
 		System.out.println(listOfParsingTrees.get(0).diplayTree());
 	}

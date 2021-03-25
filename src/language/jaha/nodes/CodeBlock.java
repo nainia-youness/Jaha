@@ -14,7 +14,7 @@ public class CodeBlock implements Node{
 	public Object eval() {
 		if(expressions.size()==0)
 			return null;
-		return null;
+		return true;
 	}
 
 	@Override
