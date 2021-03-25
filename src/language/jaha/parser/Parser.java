@@ -11,6 +11,7 @@ import language.jaha.nodes.CodeBlock;
 import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
+import language.jaha.nodes.IfNode;
 import language.jaha.nodes.Node;
 import language.jaha.nodes.UnaryOperator;
 import language.jaha.nodes.Variable;
@@ -24,6 +25,10 @@ public class Parser {
 	List<List<Object>> lineOfOperators=new ArrayList<> (Arrays.asList());
 	int addedPriority=0;
 	List<List<Object>> ListOfNodes=new ArrayList<> (Arrays.asList());
+	private String endToken="Semicolon";
+	int ifStartIndex=-50;
+	boolean isElse=false;
+	boolean isIf=false;
 	
 	
 	public Parser(List<Token> listOfTokens) {
@@ -372,7 +377,7 @@ public class Parser {
 	private void parseExpression(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		errorHandler.isExistingOperator(token);
-		if(!token.getType().equals("Semicolon")) {
+		if(!token.getType().equals(endToken)) {
 			 addTolineOfOperators(i,errorHandler);
 		}
 		else {//you have reached the semicolon for example
@@ -421,6 +426,7 @@ public class Parser {
 	private void parseCodeBlock(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(token.getType().equals("LeftBrace")) {
+			endToken="Semicolon";
 			errorHandler.isRightTokenExist(i,"RightBrace","LeftBrace",false);
 			CodeBlock block=new CodeBlock();
 			listOfParsingTrees.add(block);
@@ -436,13 +442,63 @@ public class Parser {
 		}
 	}
 	
+	
+	private void parseIfNode(int i,ErrorHandler errorHandler) throws Exception {//TODO: if there is nested ifs, he only remembers the last one(use array)
+		System.out.println(ifStartIndex);
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("Keyword_if")) {
+			IfNode ifNode= new IfNode();
+			listOfParsingTrees.add(ifNode);
+			endToken="LeftBrace";
+			ifStartIndex=i;
+			isIf=true;
+		}
+		else if(isIf) {
+			if(listOfParsingTrees.size()-1-ifStartIndex==2)//if after the ifNode , there is only the expression and the blockNode
+			{
+				if(listOfParsingTrees.get(ifStartIndex+2).getClass().getName().equals("language.jaha.nodes.CodeBlock")) {
+					if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+2)).getExpressions().isEmpty()) {
+						ExpressionNode exp=(ExpressionNode)listOfParsingTrees.get(ifStartIndex+1);
+						CodeBlock block=(CodeBlock)listOfParsingTrees.get(ifStartIndex+2);
+						((IfNode)listOfParsingTrees.get(ifStartIndex)).setCondition(exp);
+						((IfNode)listOfParsingTrees.get(ifStartIndex)).setIfCodeblock(block);
+						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+						isIf=false;
+					}
+				}
+			}
+		}
+		
+		if(token.getType().equals("Keyword_else")) {
+			//see if there is a previous if node if not raize error
+			isElse=true;
+		}
+		if(isElse) {
+			System.out.println("add the else node.............................................1   "+ifStartIndex);
+			if(listOfParsingTrees.size()-1-ifStartIndex==1) {//if after the ifNode , there is only the blockNode
+				System.out.println("add the else node.............................................2");
+				if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+1)).getExpressions().isEmpty()) {
+					System.out.println("add the else node.............................................");
+					CodeBlock elseBlock=(CodeBlock)listOfParsingTrees.get(ifStartIndex+1);
+					((IfNode)listOfParsingTrees.get(ifStartIndex)).setElseCodeblock(elseBlock);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					isElse=false;
+				}
+			}
+		}
+	}
+	
+	
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
-			//Token token=listOfTokens.get(i);
+			System.out.println(listOfParsingTrees);
+			Token token=listOfTokens.get(i);
 			//token.showToken();
+			parseExpression(i,errorHandler);//the order of the parsers is important
 			parseCodeBlock(i,errorHandler);
-			parseExpression(i,errorHandler);
+			parseIfNode(i,errorHandler);
 		}
 		System.out.println("...................................................");
 		System.out.println(listOfParsingTrees);

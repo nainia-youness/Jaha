@@ -205,10 +205,17 @@ public class ErrorHandler {
 	
 	
 	public void isRightTokenExist(int i,String rightTokenType,String leftTokenType,boolean isInSameLine) throws Exception{
-		if(listOfTokens.get(i+1).getType().equals("Semicolon"))
-			throw new Exception("ERROR: Wrong useage of Parenthesis!");
-		if(listOfTokens.get(i+1).getType().equals(rightTokenType))//
-			throw new Exception("ERROR: Two Parenthesis can t be empty!");
+		String errorMessage="Error";
+		String token="Paren";
+		if(rightTokenType.equals("RightBrace"))
+			token="Braces";
+		else if(rightTokenType.equals("RightParen"))
+			token="Parenthesis";
+		if(listOfTokens.get(i+1).getType().equals("Semicolon")) {
+			throw new Exception("ERROR: Wrong useage of "+token+"!");
+		}
+		if(listOfTokens.get(i+1).getType().equals(rightTokenType)) 
+			throw new Exception("ERROR: Two "+token+" can t be empty!");
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j<listOfTokens.size();j++) {
@@ -225,18 +232,18 @@ public class ErrorHandler {
 					nbrRightParenthes++;
 			}
 		}
-		String errorMessage="Error";
-		if(rightTokenType.equals("RightBrace"))
-			errorMessage="ERROR: Right Brace is missing";
-		else if(rightTokenType.equals("RightParen"))
-			errorMessage="ERROR: Right Parenthesis is missing";
 		if(nbrLeftParenthes!=nbrRightParenthes)
-			throw new Exception(errorMessage);
+			throw new Exception("ERROR: Right "+token+" is missing");
 	}
 	
 	public void isLeftTokenExist(int i,String rightTokenType,String leftTokenType,boolean isInSameLine) throws Exception{
+		String token="Paren";
+		if(rightTokenType.equals("RightBrace"))
+			token="Braces";
+		else if(rightTokenType.equals("RightParen"))
+			token="Parenthesis";
 		if(listOfTokens.get(i-1).getType().equals(leftTokenType))
-			throw new Exception("ERROR: Two Parenthesis can t be empty!");
+			throw new Exception("ERROR: Two "+token+" can t be empty!");
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j>=0;j--) {
@@ -253,13 +260,8 @@ public class ErrorHandler {
 				nbrRightParenthes++;
 			}
 		}
-		String errorMessage="Error";
-		if(rightTokenType.equals("RightBrace"))
-			errorMessage="ERROR: Left Brace is missing";
-		else if(rightTokenType.equals("RightParen"))
-			errorMessage="ERROR: Left Parenthesis is missing";
 		if(nbrLeftParenthes!=nbrRightParenthes)
-			throw new Exception(errorMessage);
+			throw new Exception("ERROR: Left "+token+" is missing");
 	}
 
 }
