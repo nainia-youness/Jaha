@@ -200,6 +200,27 @@ public class ErrorHandler {
 		}
 	}
 	
+	public void isNodeExpression(Node node) throws Exception{
+		if(!node.getClass().getName().equals("language.jaha.nodes.BinaryOperator") && !node.getClass().getName().equals("language.jaha.nodes.UnaryOperator") && !node.getClass().getName().equals("language.jaha.nodes.Identifier") && !node.getClass().getName().equals("language.jaha.nodes.Integer") && !node.getClass().getName().equals("language.jaha.nodes.Double") && !node.getClass().getName().equals("language.jaha.nodes.String") && !node.getClass().getName().equals("language.jaha.nodes.Variable"))
+			throw new Exception("ERROR: Expression Node not found");
+	}
+	
+	public void isNodeBlock(Node node) throws Exception{
+		if(!node.getClass().getName().equals("language.jaha.nodes.CodeBlock"))
+			throw new Exception("ERROR: Block Node not found");
+	}
+	
+	public void isExpressionBeforeLeftBrace(int i) throws Exception{
+		int nbrOfTokensBeforeLeftBrace=0;
+		for(int j=i;j<listOfTokens.size();j++) {
+			if(listOfTokens.get(j).getSymbol().equals("{"))
+				break;
+			nbrOfTokensBeforeLeftBrace++;
+		}
+		System.out.println("aaaaaaaaaaaaaaaa"+nbrOfTokensBeforeLeftBrace);
+		if(nbrOfTokensBeforeLeftBrace==1)
+			throw new Exception("ERROR: Exression Node not found");
+	}
 	
 	public void UnaryOperatorErrorCheck(UnaryOperator uo) throws Exception {
 		ExpressionNode childNode=(ExpressionNode)  uo.getChildNode();
