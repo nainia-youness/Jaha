@@ -71,7 +71,6 @@ public class ErrorHandler {
 			throw new Exception("ERROR: no operator found ");
 	}
 	
-	
 	public void isExistingOperator(Token token) throws Exception {
 		if(token.getType().equals("error"))
 			throw new Exception("ERROR: operator not supported");

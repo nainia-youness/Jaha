@@ -467,6 +467,8 @@ public class Parser {
 			listOfRightBraceIndexes.add(getIndexOfRightBrace(i));
 			listOfParsingTrees.add(block);
 		}
+		if(token.getType().equals("RightBrace"))
+			errorHandler.isLeftTokenExist(i,"RightBrace","LeftBrace",false);
 		if(listOfRightBraceIndexes.size()!=0){
 			if(i==listOfRightBraceIndexes.get(listOfRightBraceIndexes.size()-1)) {
 				errorHandler.isLeftTokenExist(i,"RightBrace","LeftBrace",false);
