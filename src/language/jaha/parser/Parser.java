@@ -28,7 +28,8 @@ public class Parser {
 	int addedPriority=0;
 	List<List<Object>> ListOfNodes=new ArrayList<> (Arrays.asList());
 	private String endToken="Semicolon";
-	List<List<Object>> ifStartIndexes=new ArrayList<> (Arrays.asList());
+	List<List<Object>> ifIndexes=new ArrayList<> (Arrays.asList());
+	List<Integer> forIndexes=new ArrayList<> ();
 	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	int printIndex=-50;
 	
@@ -271,7 +272,7 @@ public class Parser {
 	private int getLeftVariableIndex(int OperatorItemj) {
 		int i=OperatorItemj-1;
 		while(i>=0){
-			if(listOfTokens.get(i).getType().equals("Integer") || listOfTokens.get(i).getType().equals("Double") || listOfTokens.get(i).getType().equals("String") || listOfTokens.get(i).getType().equals("Boolean"))
+			if(listOfTokens.get(i).getType().equals("Integer") || listOfTokens.get(i).getType().equals("Double") || listOfTokens.get(i).getType().equals("String") || listOfTokens.get(i).getType().equals("Boolean") || listOfTokens.get(i).getType().equals("Identifier"))
 				return i;
 			i--;
 		}
@@ -281,7 +282,7 @@ public class Parser {
 	private int getRightVariableIndex(int OperatorItemj) {
 		int i=OperatorItemj+1;
 		while(i<listOfTokens.size()){
-			if(listOfTokens.get(i).getType().equals("Integer") || listOfTokens.get(i).getType().equals("Double") || listOfTokens.get(i).getType().equals("String") || listOfTokens.get(i).getType().equals("Boolean"))
+			if(listOfTokens.get(i).getType().equals("Integer") || listOfTokens.get(i).getType().equals("Double") || listOfTokens.get(i).getType().equals("String") || listOfTokens.get(i).getType().equals("Boolean") || listOfTokens.get(i).getType().equals("Identifier"))
 				return i;
 			i++;
 		}
@@ -522,10 +523,10 @@ public class Parser {
 			listOfParsingTrees.add(ifNode);
 			endToken="LeftBrace";
 			List<Object> ifStartIndexList=Arrays.asList(listOfParsingTrees.size()-1,isElseExist(i));
-			ifStartIndexes.add(ifStartIndexList);
+			ifIndexes.add(ifStartIndexList);
 		}
-		if(ifStartIndexes.size()!=0) {
-			int ifStartIndex=(Integer)(ifStartIndexes.get(ifStartIndexes.size()-1).get(0));
+		if(ifIndexes.size()!=0) {
+			int ifStartIndex=(Integer)(ifIndexes.get(ifIndexes.size()-1).get(0));
 			if(listOfParsingTrees.size()-1-ifStartIndex==2)//if after the ifNode , there is only the expression and the blockNode
 			{
 				if(isNodeExpression(listOfParsingTrees.get(ifStartIndex+1))) {
@@ -537,22 +538,22 @@ public class Parser {
 						((IfNode)listOfParsingTrees.get(ifStartIndex)).setIfCodeblock(block);
 						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
 						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
-						if((Boolean)(ifStartIndexes.get(ifStartIndexes.size()-1).get(1))==false)
-							ifStartIndexes.remove(ifStartIndexes.size()-1);
+						if((Boolean)(ifIndexes.get(ifIndexes.size()-1).get(1))==false)
+							ifIndexes.remove(ifIndexes.size()-1);
 					}
 				}
 			}
 		}
-		if(ifStartIndexes.size()!=0) {
-			int ifStartIndex=(Integer)(ifStartIndexes.get(ifStartIndexes.size()-1).get(0));
-			if((Boolean)(ifStartIndexes.get(ifStartIndexes.size()-1).get(1))==true) {
+		if(ifIndexes.size()!=0) {
+			int ifStartIndex=(Integer)(ifIndexes.get(ifIndexes.size()-1).get(0));
+			if((Boolean)(ifIndexes.get(ifIndexes.size()-1).get(1))==true) {
 				if(listOfParsingTrees.size()-1-ifStartIndex==1) {//if after the ifNode , there is only the blockNode
 					errorHandler.isNodeBlock(listOfParsingTrees.get(ifStartIndex+1));
 					if(!((CodeBlock)listOfParsingTrees.get(ifStartIndex+1)).getExpressions().isEmpty()) {
 						CodeBlock elseBlock=(CodeBlock)listOfParsingTrees.get(ifStartIndex+1);
 						((IfNode)listOfParsingTrees.get(ifStartIndex)).setElseCodeblock(elseBlock);
 						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
-						ifStartIndexes.remove(ifStartIndexes.size()-1);
+						ifIndexes.remove(ifIndexes.size()-1);
 					}
 				}
 			}
@@ -567,25 +568,63 @@ public class Parser {
 			listOfParsingTrees.add(printNode);
 			printIndex=listOfParsingTrees.size()-1;
 		}
-		if(listOfParsingTrees.size()-1-printIndex==1) {
-			errorHandler.isNodeExpression(listOfParsingTrees.get(printIndex+1));
-			if(isNodeExpression(listOfParsingTrees.get(printIndex+1))){
-				ExpressionNode exp=(ExpressionNode)listOfParsingTrees.get(printIndex+1);
-				((PrintNode)listOfParsingTrees.get(printIndex)).setChildNode(exp);
-				listOfParsingTrees.remove(listOfParsingTrees.size()-1);
-				printIndex=-50;
+		if(printIndex!=-50) {
+			if(listOfParsingTrees.size()-1-printIndex==1) {
+				errorHandler.isNodeExpression(listOfParsingTrees.get(printIndex+1));
+				if(isNodeExpression(listOfParsingTrees.get(printIndex+1))){
+					ExpressionNode exp=(ExpressionNode)listOfParsingTrees.get(printIndex+1);
+					((PrintNode)listOfParsingTrees.get(printIndex)).setChildNode(exp);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					printIndex=-50;
+				}
 			}
 		}
 	}
 	
-	/*private void parseForNode(int i,ErrorHandler errorHandler) throws Exception {
+	private void parseForNode(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(token.getType().equals("Keyword_for")) {
+			errorHandler.isExpressionBeforeLeftBrace(i);
 			ForNode forNode= new ForNode();
 			listOfParsingTrees.add(forNode);
+			endToken="Comma";
+			forIndexes.add(listOfParsingTrees.size()-1);
 		}
-	}*/
+		if(forIndexes.size()!=0) {
+			int forIndex=forIndexes.get(forIndexes.size()-1);
+			if(listOfParsingTrees.size()-1-forIndex==2) {
+				System.out.println("I made it this far..................");
+				endToken="RightParen";
+			}
+			else if(listOfParsingTrees.size()-1-forIndex==3) {
+				errorHandler.isNodeExpression(listOfParsingTrees.get(forIndex+1));
+				errorHandler.isNodeExpression(listOfParsingTrees.get(forIndex+2));
+				errorHandler.isNodeExpression(listOfParsingTrees.get(forIndex+3));
+			}
+			else if (listOfParsingTrees.size()-1-forIndex==4) {
+				if(!((CodeBlock)listOfParsingTrees.get(forIndex+4)).getExpressions().isEmpty()) {
+					ExpressionNode initialization=(ExpressionNode)listOfParsingTrees.get(forIndex+1);
+					ExpressionNode termination=(ExpressionNode)listOfParsingTrees.get(forIndex+2);
+					ExpressionNode increment=(ExpressionNode)listOfParsingTrees.get(forIndex+3);
+					CodeBlock forBlock=(CodeBlock)listOfParsingTrees.get(forIndex+4);
+					((ForNode)listOfParsingTrees.get(forIndex)).setInitialization(initialization);
+					((ForNode)listOfParsingTrees.get(forIndex)).setIncrement(increment);
+					((ForNode)listOfParsingTrees.get(forIndex)).setTermination(termination);
+					((ForNode)listOfParsingTrees.get(forIndex)).setChildNode(forBlock);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					forIndexes.remove(forIndexes.size()-1);
+				}
+			}
+		}
+	}
 	
+	private void diplayAllTree() {
+		for(int i=0;i<listOfParsingTrees.size();i++)
+			System.out.println(listOfParsingTrees.get(i).diplayTree());
+	}
 
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
@@ -597,11 +636,9 @@ public class Parser {
 			parseCodeBlock(i,errorHandler);
 			parseIfNode(i,errorHandler);
 			parsePrintNode(i,errorHandler);
-			//parseForNode(i,errorHandler);
+			parseForNode(i,errorHandler);
 		}
 		System.out.println("...................................................");
-		System.out.println(ifStartIndexes);
-		System.out.println(listOfParsingTrees);
-		System.out.println(listOfParsingTrees.get(0).diplayTree());
+		diplayAllTree();
 	}
 }

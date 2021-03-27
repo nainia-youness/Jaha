@@ -6,7 +6,7 @@ public class ForNode implements Node{
 	Node termination;
 	Node increment;
 	Node childNode;
-	
+
 	@Override
 	public Object eval() {
 		// TODO Auto-generated method stub
@@ -15,7 +15,16 @@ public class ForNode implements Node{
 
 	@Override
 	public String diplayTree() {
-		return "( For( "+initialization.diplayTree()+" ; "+termination.diplayTree()+" ; "+increment.diplayTree()+" ) {\n "+childNode.diplayTree()+"} )";
+		return "( For( "+initialization.diplayTree()+" ; "+termination.diplayTree()+" ; "+increment.diplayTree()+" ) {\n "+childNode.diplayTree()+"\n} )";
+	}
+	
+	
+	public Node getChildNode() {
+		return childNode;
+	}
+
+	public void setChildNode(Node childNode) {
+		this.childNode = childNode;
 	}
 	
 	public Node getTermination() {
