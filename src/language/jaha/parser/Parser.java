@@ -403,7 +403,7 @@ public class Parser {
 				}
 				System.out.println(ListOfNodes);
 				Node parsingTree=(Node)ListOfNodes.get(0).get(1);
-				System.out.println(parsingTree.eval());
+				//System.out.println(parsingTree.eval());
 				System.out.println(parsingTree.diplayTree());
 				listOfParsingTrees.add(parsingTree);
 				initialize();
@@ -476,6 +476,7 @@ public class Parser {
 				System.out.println("blockStartIndex: "+blockStartIndex);
 				CodeBlock block=(CodeBlock)listOfParsingTrees.get(blockStartIndex);
 				for(int j=blockStartIndex+1;j<listOfParsingTrees.size();j++) {
+					errorHandler.isExpressionAcceptable((Node)listOfParsingTrees.get(j));
 					block.addExpression(listOfParsingTrees.get(j));
 				}
 				deleteNodesOfBlock(blockStartIndex);

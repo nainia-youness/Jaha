@@ -83,6 +83,7 @@ public class ErrorHandler {
 		return true;
 	}
 	
+	
 	public void BinaryOperatorErrorCheck(BinaryOperator bo) throws Exception {
 		ExpressionNode leftNode=(ExpressionNode)  bo.getLeftNode();
 		ExpressionNode rightNode=(ExpressionNode) bo.getRightNode();
@@ -186,6 +187,19 @@ public class ErrorHandler {
 			}
 
 	}
+	
+	public void isExpressionAcceptable(Node node) throws Exception{
+		if(node.getClass().getName().equals("language.jaha.nodes.BinaryOperator"))
+		{
+			if(!((BinaryOperator)node).getOperator().equals("=") && !((BinaryOperator)node).getOperator().equals("+=") && !((BinaryOperator)node).getOperator().equals("-=") && !((BinaryOperator)node).getOperator().equals("%=") && !((BinaryOperator)node).getOperator().equals("/=") && !((BinaryOperator)node).getOperator().equals("*="))
+				throw new Exception("ERROR: Not a valid Expression");
+		}
+		else if(node.getClass().getName().equals("language.jaha.nodes.UnaryOperator")) {
+			if(!((UnaryOperator)node).getOperator().equals("++") && !((UnaryOperator)node).getOperator().equals("--"))
+				throw new Exception("ERROR: Not a valid Expression");
+		}
+	}
+	
 	
 	public void UnaryOperatorErrorCheck(UnaryOperator uo) throws Exception {
 		ExpressionNode childNode=(ExpressionNode)  uo.getChildNode();

@@ -137,14 +137,17 @@ public class BinaryOperator extends ExpressionNode{
 			return null;
 		case "+=":
 			if(this.rightNode.getType().equals("Integer")) {
+				leftNode.setType("Integer");
 				leftNode.setValue((Integer)leftNode.getValue()+(Integer)this.rightNode.eval());
 				return (Integer)this.rightNode.eval();
 			}
 			else if(this.rightNode.getType().equals("Double")) {
+				leftNode.setType("Double");
 				leftNode.setValue((Double)leftNode.getValue()+(Double)this.rightNode.eval());
 				return (Double)this.rightNode.eval();
 			}
 			else if(this.rightNode.getType().equals("String")) {
+				leftNode.setType("String");
 				leftNode.setValue((String)leftNode.getValue()+(String)this.rightNode.eval());
 				return (String)this.rightNode.eval();
 			}
