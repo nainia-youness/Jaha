@@ -1,5 +1,4 @@
-pour(i=0,i<80,++i){
-	pour(j=0,j<8,++j){
-		ecrire(5);
-	}
+tantQue(i==5){
+	ecrire(i);
+	++i;
 }

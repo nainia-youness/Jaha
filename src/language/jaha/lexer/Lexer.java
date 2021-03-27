@@ -17,7 +17,7 @@ public class Lexer {
 	Arrays.asList("sinon","Keyword_else"),
 	Arrays.asList("pour","Keyword_for"),
 	Arrays.asList("ecrire","Keyword_print"),
-	Arrays.asList("quand","Keyword_while"),
+	Arrays.asList("tantQue","Keyword_while"),
 	Arrays.asList("fonction","Keyword_function"),
 	Arrays.asList("retourne","Keyword_return"),
 	Arrays.asList("vecteur","Keyword_array")

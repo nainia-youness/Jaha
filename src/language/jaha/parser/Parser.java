@@ -17,6 +17,7 @@ import language.jaha.nodes.Node;
 import language.jaha.nodes.PrintNode;
 import language.jaha.nodes.UnaryOperator;
 import language.jaha.nodes.Variable;
+import language.jaha.nodes.WhileNode;
 
 public class Parser {
 
@@ -30,6 +31,7 @@ public class Parser {
 	private String endToken="Semicolon";
 	List<List<Object>> ifIndexes=new ArrayList<> (Arrays.asList());
 	List<Integer> forIndexes=new ArrayList<> ();
+	List<Integer> whileIndexes=new ArrayList<> ();
 	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	int printIndex=-50;
 	
@@ -622,10 +624,37 @@ public class Parser {
 	}
 	
 	private void diplayAllTree() {
-		for(int i=0;i<listOfParsingTrees.size();i++)
+		for(int i=0;i<listOfParsingTrees.size();i++) {
+			System.out.println("..........................................................");
 			System.out.println(listOfParsingTrees.get(i).diplayTree());
+		}
 	}
 
+	private void parseWhileNode(int i,ErrorHandler errorHandler) throws Exception {
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("Keyword_while")) {
+			errorHandler.isExpressionBeforeLeftBrace(i);
+			WhileNode whileNode= new WhileNode();
+			listOfParsingTrees.add(whileNode);
+			endToken="RightParen";
+			whileIndexes.add(listOfParsingTrees.size()-1);
+		}
+		if(whileIndexes.size()!=0) {
+			int whileIndex=whileIndexes.get(whileIndexes.size()-1);
+			if(listOfParsingTrees.size()-1-whileIndex==2) {
+				if(!((CodeBlock)listOfParsingTrees.get(whileIndex+2)).getExpressions().isEmpty()) {
+					ExpressionNode condition=(ExpressionNode)listOfParsingTrees.get(whileIndex+1);
+					CodeBlock whileBlock=(CodeBlock)listOfParsingTrees.get(whileIndex+2);
+					((WhileNode)listOfParsingTrees.get(whileIndex)).setCondition(condition);
+					((WhileNode)listOfParsingTrees.get(whileIndex)).setChildNode(whileBlock);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					whileIndexes.remove(whileIndexes.size()-1);
+				}
+			}
+		}
+	}
+	
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
@@ -637,8 +666,8 @@ public class Parser {
 			parseIfNode(i,errorHandler);
 			parsePrintNode(i,errorHandler);
 			parseForNode(i,errorHandler);
+			parseWhileNode(i,errorHandler);
 		}
-		System.out.println("...................................................");
 		diplayAllTree();
 	}
 }
