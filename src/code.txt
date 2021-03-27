@@ -1,4 +1,4 @@
-tantQue(i==5){
-	ecrire(i);
-	++i;
+fonction app(a,b,d){
+	a=15;
+	retourne 10;
 }

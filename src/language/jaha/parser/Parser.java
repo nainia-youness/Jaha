@@ -18,6 +18,7 @@ import language.jaha.nodes.PrintNode;
 import language.jaha.nodes.UnaryOperator;
 import language.jaha.nodes.Variable;
 import language.jaha.nodes.WhileNode;
+import language.jaha.nodes.ReturnNode;
 
 public class Parser {
 
@@ -34,7 +35,7 @@ public class Parser {
 	List<Integer> whileIndexes=new ArrayList<> ();
 	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	int printIndex=-50;
-	
+	int returnIndex=-50;
 	
 	public Parser(List<Token> listOfTokens) {
 		this.listOfTokens=listOfTokens;
@@ -655,6 +656,35 @@ public class Parser {
 		}
 	}
 	
+	
+	private void parseReturnNode(int i,ErrorHandler errorHandler) throws Exception {
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("Keyword_return")) {
+			ReturnNode returnNode= new ReturnNode();
+			listOfParsingTrees.add(returnNode);
+			returnIndex=listOfParsingTrees.size()-1;
+		}
+		if(returnIndex!=-50) {
+			if(listOfParsingTrees.size()-1-returnIndex==1) {
+				errorHandler.isNodeExpression(listOfParsingTrees.get(returnIndex+1));
+				if(isNodeExpression(listOfParsingTrees.get(returnIndex+1))){
+					ExpressionNode exp=(ExpressionNode)listOfParsingTrees.get(returnIndex+1);
+					((ReturnNode)listOfParsingTrees.get(returnIndex)).setReturnedNode(exp);
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					returnIndex=-50;
+				}
+			}
+		}
+	}
+	
+	private void parseFunctionNode(int i,ErrorHandler errorHandler) throws Exception {
+		Token token=listOfTokens.get(i);
+		if(token.getType().equals("Keyword_function")) {
+			errorHandler.isExpressionBeforeLeftBrace(i);
+			
+		}
+	}
+	
 	public void parse() throws Exception {
 		ErrorHandler errorHandler=new ErrorHandler(listOfTokens);
 		for(int i=0;i<this.listOfTokens.size();i++) {
@@ -667,7 +697,11 @@ public class Parser {
 			parsePrintNode(i,errorHandler);
 			parseForNode(i,errorHandler);
 			parseWhileNode(i,errorHandler);
+			parseReturnNode(i,errorHandler);
+			parseFunctionNode(i,errorHandler);
 		}
+		System.out.println("..........................................................");
+		System.out.println(listOfParsingTrees);
 		diplayAllTree();
 	}
 }

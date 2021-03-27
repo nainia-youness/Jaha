@@ -189,6 +189,7 @@ public class ErrorHandler {
 	}
 	
 	public void isExpressionAcceptable(Node node) throws Exception{
+		System.out.println(node.getClass().getName());
 		if(node.getClass().getName().equals("language.jaha.nodes.BinaryOperator"))
 		{
 			if(!((BinaryOperator)node).getOperator().equals("=") && !((BinaryOperator)node).getOperator().equals("+=") && !((BinaryOperator)node).getOperator().equals("-=") && !((BinaryOperator)node).getOperator().equals("%=") && !((BinaryOperator)node).getOperator().equals("/=") && !((BinaryOperator)node).getOperator().equals("*="))
