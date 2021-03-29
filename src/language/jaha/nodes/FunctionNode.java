@@ -1,13 +1,17 @@
 package language.jaha.nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionNode implements Node{
 
 	private List<Node> parameters;
 	private Node childNode;
-	private String FunctionName;
+	private String functionName;
 	
+	public FunctionNode() {
+		parameters=new ArrayList<> ();
+	}
 	
 	@Override
 	public Object eval() {
@@ -17,7 +21,13 @@ public class FunctionNode implements Node{
 
 	@Override
 	public String diplayTree() {
-		return "function "+FunctionName+" ";
+		String paramsStr="";
+		if(parameters.size()!=0) {
+			for(int i=0;i<parameters.size();i++) {
+				paramsStr+=parameters.get(i).diplayTree();
+			}
+		}
+		return "function "+functionName+"( "+paramsStr+" ) {\n"+childNode.diplayTree()+" \n}";
 	}
 
 	public Node getChildNode() {
@@ -29,11 +39,11 @@ public class FunctionNode implements Node{
 	}
 	
 	public String getFunctionName() {
-		return FunctionName;
+		return functionName;
 	}
 
 	public void setFunctionName(String functionName) {
-		FunctionName = functionName;
+		this.functionName = functionName;
 	}
 	
 	public List<Node> getParameters() {
@@ -44,5 +54,8 @@ public class FunctionNode implements Node{
 		this.parameters = parameters;
 	}
 
+	public void addParameters(Node parameter) {
+		parameters.add(parameter);
+	}
 
 }

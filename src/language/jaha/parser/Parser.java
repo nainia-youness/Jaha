@@ -10,6 +10,7 @@ import language.jaha.nodes.BinaryOperator;
 import language.jaha.nodes.CodeBlock;
 import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.ForNode;
+import language.jaha.nodes.FunctionNode;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
 import language.jaha.nodes.IfNode;
@@ -33,9 +34,11 @@ public class Parser {
 	List<List<Object>> ifIndexes=new ArrayList<> (Arrays.asList());
 	List<Integer> forIndexes=new ArrayList<> ();
 	List<Integer> whileIndexes=new ArrayList<> ();
+	List<Integer> functionIndexes=new ArrayList<> ();
 	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	int printIndex=-50;
 	int returnIndex=-50;
+	int numberOfArguments=0;
 	
 	public Parser(List<Token> listOfTokens) {
 		this.listOfTokens=listOfTokens;
@@ -300,6 +303,7 @@ public class Parser {
 			addedPriority+=30;
 		}
 		else if(token.getType().equals("RightParen")) {
+			if(i!=0)
 			errorHandler.isLeftTokenExist(i,"RightParen","LeftParen",true);
 			addedPriority-=30;
 		}
@@ -517,6 +521,12 @@ public class Parser {
 		return false;
 	}
 	
+	private boolean isNodeBlock(Node node){
+		if(node.getClass().getName().equals("language.jaha.nodes.CodeBlock"))
+			return true;
+		return false;
+	}
+	
 	
 	private void parseIfNode(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
@@ -663,6 +673,7 @@ public class Parser {
 			ReturnNode returnNode= new ReturnNode();
 			listOfParsingTrees.add(returnNode);
 			returnIndex=listOfParsingTrees.size()-1;
+			endToken="Semicolon";
 		}
 		if(returnIndex!=-50) {
 			if(listOfParsingTrees.size()-1-returnIndex==1) {
@@ -677,11 +688,54 @@ public class Parser {
 		}
 	}
 	
+	private int getNumberOfArguments(int i) {
+		for(int j=i;j<listOfTokens.size();j++) {
+			if(listOfTokens.get(j).getSymbol().equals(",")) {
+				numberOfArguments++;
+			}
+			if(listOfTokens.get(j).getSymbol().equals("{") && !listOfTokens.get(j-2).getSymbol().equals("(")) {
+				numberOfArguments++;
+			}
+		}
+		return numberOfArguments;
+	}
+	
 	private void parseFunctionNode(int i,ErrorHandler errorHandler) throws Exception {
 		Token token=listOfTokens.get(i);
 		if(token.getType().equals("Keyword_function")) {
 			errorHandler.isExpressionBeforeLeftBrace(i);
-			
+			numberOfArguments=getNumberOfArguments(i);
+			FunctionNode functionNode=new FunctionNode();
+			functionNode.setFunctionName(listOfTokens.get(i+1).getSymbol());
+			System.out.println("///////////////////////////////////////////////////"+listOfTokens.get(i+1).getSymbol());
+			listOfParsingTrees.add(functionNode);
+			endToken="Comma";
+			functionIndexes.add(listOfParsingTrees.size()-1);
+		}
+		if(functionIndexes.size()!=0) {
+			int functionIndex=functionIndexes.get(functionIndexes.size()-1);
+			System.out.println("///////////////////////////////////////////////////");
+			System.out.println(listOfParsingTrees.size()-1-functionIndex);
+			System.out.println(numberOfArguments-1);
+			if(listOfParsingTrees.size()-1-functionIndex==numberOfArguments-1) {
+				endToken="RightParen";
+			}
+			if(isNodeBlock(listOfParsingTrees.get(listOfParsingTrees.size()-1))) {
+				FunctionNode functionNode=(FunctionNode)listOfParsingTrees.get(functionIndex);
+				if(!((CodeBlock)listOfParsingTrees.get(listOfParsingTrees.size()-1)).getExpressions().isEmpty()) {
+					for(int j=1;j<listOfParsingTrees.size();j++) {
+						if(isNodeBlock(listOfParsingTrees.get(j)))
+							break;
+						functionNode.addParameters(listOfParsingTrees.get(j));
+					}
+					functionNode.setChildNode(listOfParsingTrees.get(listOfParsingTrees.size()-1));
+					for(int j=0;j<numberOfArguments+1;j++) {
+						listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+					}
+					functionIndexes.remove(functionIndexes.size()-1);
+					numberOfArguments=0;
+				}
+			}
 		}
 	}
 	

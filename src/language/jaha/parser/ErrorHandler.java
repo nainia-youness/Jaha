@@ -249,8 +249,20 @@ public class ErrorHandler {
 		if(listOfTokens.get(i+1).getType().equals("Semicolon")) {
 			throw new Exception("ERROR: Wrong useage of "+token+"!");
 		}
-		if(listOfTokens.get(i+1).getType().equals(rightTokenType)) 
-			throw new Exception("ERROR: Two "+token+" can t be empty!");
+		if(listOfTokens.get(i+1).getType().equals(rightTokenType)) {
+			if(i>=2) {
+				System.out.println(listOfTokens.get(i-1).getType());
+				if(!listOfTokens.get(i-2).getType().equals("Keyword_function")) {
+					throw new Exception("ERROR: Two "+token+" can t be empty!");
+				}
+			}
+			else {
+				throw new Exception("ERROR: Two "+token+" can t be empty!");
+			}
+		}
+
+		/*if(listOfTokens.get(i+1).getType().equals(rightTokenType)) 
+			throw new Exception("ERROR: Two "+token+" can t be empty!");*/
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j<listOfTokens.size();j++) {
@@ -277,8 +289,6 @@ public class ErrorHandler {
 			token="Braces";
 		else if(rightTokenType.equals("RightParen"))
 			token="Parenthesis";
-		if(listOfTokens.get(i-1).getType().equals(leftTokenType))
-			throw new Exception("ERROR: Two "+token+" can t be empty!");
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j>=0;j--) {

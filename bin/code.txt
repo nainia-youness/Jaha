@@ -1,4 +1,4 @@
-fonction app(a,b,d){
+fonction app(a,b,y){
 	a=15;
 	retourne 10;
 }

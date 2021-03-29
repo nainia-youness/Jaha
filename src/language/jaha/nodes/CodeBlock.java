@@ -21,7 +21,7 @@ public class CodeBlock implements Node{
 	public String diplayTree() {
 		String tree="";
 		for(int i=0;i<expressions.size();i++) {
-			tree+="(Exp: "+expressions.get(i).diplayTree()+" )";
+			tree+="(Exp: "+expressions.get(i).diplayTree()+" )\n";
 		}
 		return tree;
 	}
