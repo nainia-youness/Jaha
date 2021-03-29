@@ -175,7 +175,6 @@ public class ErrorHandler {
 					throw new Exception("ERROR: Previous token not variable or parameter");
 				}
 				else if(!isNumericalBinaryOperationTypeAllowed(leftNode,rightNode)) {
-					System.out.println(leftNode.getType()+"                      "+rightNode.getType());
 					throw new Exception("ERROR: Binary operation parameters not allowedd");
 				}
 				else if(!isIdentifierInitialized(leftNode)) {//should be defined
@@ -189,7 +188,6 @@ public class ErrorHandler {
 	}
 	
 	public void isExpressionAcceptable(Node node) throws Exception{
-		System.out.println(node.getClass().getName());
 		if(node.getClass().getName().equals("language.jaha.nodes.BinaryOperator"))
 		{
 			if(!((BinaryOperator)node).getOperator().equals("=") && !((BinaryOperator)node).getOperator().equals("+=") && !((BinaryOperator)node).getOperator().equals("-=") && !((BinaryOperator)node).getOperator().equals("%=") && !((BinaryOperator)node).getOperator().equals("/=") && !((BinaryOperator)node).getOperator().equals("*="))
@@ -218,7 +216,6 @@ public class ErrorHandler {
 				break;
 			nbrOfTokensBeforeLeftBrace++;
 		}
-		System.out.println("aaaaaaaaaaaaaaaa"+nbrOfTokensBeforeLeftBrace);
 		if(nbrOfTokensBeforeLeftBrace==1)
 			throw new Exception("ERROR: Exression Node not found");
 	}
@@ -260,9 +257,6 @@ public class ErrorHandler {
 				throw new Exception("ERROR: Two "+token+" can t be empty!");
 			}
 		}
-
-		/*if(listOfTokens.get(i+1).getType().equals(rightTokenType)) 
-			throw new Exception("ERROR: Two "+token+" can t be empty!");*/
 		int nbrLeftParenthes=0;
 		int nbrRightParenthes=0;
 		for(int j=i;j<listOfTokens.size();j++) {

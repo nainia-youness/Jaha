@@ -1,4 +1,7 @@
-fonction app(a,b,y){
+fct(51,87,9000);
+fonction app(i,b,c){
 	a=15;
-	retourne 10;
+	retourne10 ;
+	hey=5.5555;
 }
+a==80;

@@ -219,7 +219,6 @@ public class Lexer {
 						}
 						else {
 							if(!token.equals(" ") && !token.equals("	") && !token.equals("")) {
-								System.out.println("Identifier="+token);
 								Token t=new Token("Identifier",row,i,token);
 								listOfTokens.add(t);
 							}

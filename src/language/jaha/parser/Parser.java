@@ -10,6 +10,7 @@ import language.jaha.nodes.BinaryOperator;
 import language.jaha.nodes.CodeBlock;
 import language.jaha.nodes.ExpressionNode;
 import language.jaha.nodes.ForNode;
+import language.jaha.nodes.FunctionCallNode;
 import language.jaha.nodes.FunctionNode;
 import language.jaha.nodes.GeneralObject;
 import language.jaha.nodes.Identifier;
@@ -37,6 +38,7 @@ public class Parser {
 	List<Integer> functionIndexes=new ArrayList<> ();
 	List<Integer> listOfRightBraceIndexes=new ArrayList<>();
 	int printIndex=-50;
+	int	functionCallIndex=-50;
 	int returnIndex=-50;
 	int numberOfArguments=0;
 	
@@ -112,8 +114,6 @@ public class Parser {
 	}
 	
 	
-	
-	
 	private ExpressionNode createGeneralObjectNode(int i) {
 		Token token=listOfTokens.get(i); 
 		GeneralObject go;
@@ -134,7 +134,7 @@ public class Parser {
 				value=false;
 			go= new Variable(token.getType(),value);
 		}
-		else{//it s an identifier
+		else{//it s an identifier	
 			go= new Identifier(token.getType(),null,token.getSymbol());
 		}
 		return (ExpressionNode)go;
@@ -324,7 +324,6 @@ public class Parser {
 	
 	
 	private ExpressionNode addBinaryOperatorNode(List<List<Object>> priorityListOfOperators,int OperatorItemj,int j) {
-		System.out.println("-------binary operator");
 		ExpressionNode leftNode;
 		ExpressionNode rightNode;
 		if(!isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)) {
@@ -335,22 +334,16 @@ public class Parser {
 			if(!isLeftNode(priorityListOfOperators,j) && isRightNode(priorityListOfOperators,j) ){
 				leftNode=createGeneralObjectNode(getLeftVariableIndex(OperatorItemj));
 				rightNode=getRightNode(OperatorItemj);
-				System.out.println("left not node and right node");
 			}
 			else if(isLeftNode(priorityListOfOperators,j) && !isRightNode(priorityListOfOperators,j)){
 				leftNode=getLeftNode(OperatorItemj);
 				rightNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
-				System.out.println("left node and right not node");
 			}
 			else {
 				rightNode=getLeftNode(OperatorItemj);
 				leftNode=getRightNode(OperatorItemj);
-				System.out.println("left node and right node");
 			}
 		}
-		System.out.println("left node= "+leftNode.diplayTree());
-		System.out.println("right node= "+rightNode.diplayTree());
-		//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
 		String operator=listOfTokens.get(OperatorItemj).getSymbol();
 		String type=getTypeOfBinaryOperator(operator,leftNode,rightNode);
 		
@@ -364,21 +357,16 @@ public class Parser {
 	
 	
 	private ExpressionNode addUnaryOperatorNode(List<List<Object>> priorityListOfOperators,int OperatorItemj,int j) {
-		ExpressionNode childNode;
-		System.out.println("-------unary operator");					
+		ExpressionNode childNode;					
 		if(isRightNode(priorityListOfOperators,j)) {
-			System.out.println("child is node");
 			childNode=getRightNode(OperatorItemj);
 		}
 		else {
-			System.out.println("child is not node");
 			childNode=createGeneralObjectNode(getRightVariableIndex(OperatorItemj));
 		}
-		//System.out.println("Childnode= "+childNode.diplayTree());
 		String operator=listOfTokens.get(OperatorItemj).getSymbol();
 		String type=getTypeOfUnaryOperator(operator,childNode);
 		ExpressionNode node= new UnaryOperator(type,operator,childNode);
-		//System.out.println("eval= "+node.eval() +" "+OperatorItemj);
 		ListOfNodes.add(Arrays.asList(OperatorItemj,node));
 		return node;
 	}
@@ -392,7 +380,6 @@ public class Parser {
 		}
 		else {//you have reached the semicolon for example
 			List<List<Object>> priorityListOfOperators=sortListByPriority();
-			System.out.println(priorityListOfOperators);
 			ExpressionNode node;
 			if(priorityListOfOperators.size()==0) {
 				if(priorityListOfOperators.size()<=(getLeftVariableIndex(i))) {
@@ -410,11 +397,8 @@ public class Parser {
 					else if(isUnaryOperation(OperatorItemj)) {//not including i++
 						node=addUnaryOperatorNode(priorityListOfOperators,OperatorItemj,j);
 					}
-					//System.out.println(ListOfNodes);
 				}
-				System.out.println(ListOfNodes);
 				Node parsingTree=(Node)ListOfNodes.get(0).get(1);
-				//System.out.println(parsingTree.eval());
 				System.out.println(parsingTree.diplayTree());
 				listOfParsingTrees.add(parsingTree);
 				initialize();
@@ -445,6 +429,7 @@ public class Parser {
 			listOfParsingTrees.remove(listOfParsingTrees.size()-1);
 		}
 	}
+	
 	
 	private int getIndexOfRightBrace(int i) {
 		int nbrLeftBraces=0;
@@ -606,7 +591,6 @@ public class Parser {
 		if(forIndexes.size()!=0) {
 			int forIndex=forIndexes.get(forIndexes.size()-1);
 			if(listOfParsingTrees.size()-1-forIndex==2) {
-				System.out.println("I made it this far..................");
 				endToken="RightParen";
 			}
 			else if(listOfParsingTrees.size()-1-forIndex==3) {
@@ -693,8 +677,9 @@ public class Parser {
 			if(listOfTokens.get(j).getSymbol().equals(",")) {
 				numberOfArguments++;
 			}
-			if(listOfTokens.get(j).getSymbol().equals("{") && !listOfTokens.get(j-2).getSymbol().equals("(")) {
+			if(listOfTokens.get(j).getSymbol().equals("{") || listOfTokens.get(j).getSymbol().equals(")")) {
 				numberOfArguments++;
+				break;
 			}
 		}
 		return numberOfArguments;
@@ -707,23 +692,19 @@ public class Parser {
 			numberOfArguments=getNumberOfArguments(i);
 			FunctionNode functionNode=new FunctionNode();
 			functionNode.setFunctionName(listOfTokens.get(i+1).getSymbol());
-			System.out.println("///////////////////////////////////////////////////"+listOfTokens.get(i+1).getSymbol());
 			listOfParsingTrees.add(functionNode);
 			endToken="Comma";
 			functionIndexes.add(listOfParsingTrees.size()-1);
 		}
 		if(functionIndexes.size()!=0) {
 			int functionIndex=functionIndexes.get(functionIndexes.size()-1);
-			System.out.println("///////////////////////////////////////////////////");
-			System.out.println(listOfParsingTrees.size()-1-functionIndex);
-			System.out.println(numberOfArguments-1);
 			if(listOfParsingTrees.size()-1-functionIndex==numberOfArguments-1) {
 				endToken="RightParen";
 			}
 			if(isNodeBlock(listOfParsingTrees.get(listOfParsingTrees.size()-1))) {
 				FunctionNode functionNode=(FunctionNode)listOfParsingTrees.get(functionIndex);
 				if(!((CodeBlock)listOfParsingTrees.get(listOfParsingTrees.size()-1)).getExpressions().isEmpty()) {
-					for(int j=1;j<listOfParsingTrees.size();j++) {
+					for(int j=functionIndex+1;j<listOfParsingTrees.size();j++) {
 						if(isNodeBlock(listOfParsingTrees.get(j)))
 							break;
 						functionNode.addParameters(listOfParsingTrees.get(j));
@@ -734,7 +715,37 @@ public class Parser {
 					}
 					functionIndexes.remove(functionIndexes.size()-1);
 					numberOfArguments=0;
+					endToken="Semicolon";
 				}
+			}
+		}
+	}
+	
+	private void parseFunctionCallNode(int i,ErrorHandler errorHandler) throws Exception {
+		if(listOfTokens.get(i).getType().equals("Identifier")) {
+			if(((i==0) || (i!=0 && !listOfTokens.get(i-1).getType().equals("Keyword_function"))) && listOfTokens.get(i+1).getSymbol().equals("(")) {
+				FunctionCallNode functionCallNode=new FunctionCallNode();
+				functionCallNode.setFunctionName(listOfTokens.get(i).getSymbol());
+				numberOfArguments=getNumberOfArguments(i);
+				endToken="Comma";
+				listOfParsingTrees.add(functionCallNode);
+				functionCallIndex=listOfParsingTrees.size()-1;
+			}
+		}
+		if(functionCallIndex!=-50) {
+			if(listOfParsingTrees.size()-1-functionCallIndex==numberOfArguments-1) {
+				endToken="RightParen";
+			}
+			else if(listOfParsingTrees.size()-1-functionCallIndex==numberOfArguments) {
+				FunctionCallNode functionCallNode=(FunctionCallNode)listOfParsingTrees.get(functionCallIndex);
+				for(int j=functionCallIndex+1;j<listOfParsingTrees.size();j++) {
+					functionCallNode.addArguments(listOfParsingTrees.get(j));
+				}
+				for(int j=0;j<numberOfArguments;j++) {
+					listOfParsingTrees.remove(listOfParsingTrees.size()-1);
+				}
+				numberOfArguments=0;
+				functionCallIndex=-50;
 			}
 		}
 	}
@@ -744,7 +755,7 @@ public class Parser {
 		for(int i=0;i<this.listOfTokens.size();i++) {
 			System.out.println(listOfParsingTrees);
 			Token token=listOfTokens.get(i);
-			token.showToken();
+			//token.showToken();
 			parseExpression(i,errorHandler);//the order of the parsers is important
 			parseCodeBlock(i,errorHandler);
 			parseIfNode(i,errorHandler);
@@ -753,8 +764,9 @@ public class Parser {
 			parseWhileNode(i,errorHandler);
 			parseReturnNode(i,errorHandler);
 			parseFunctionNode(i,errorHandler);
+			parseFunctionCallNode(i,errorHandler);
 		}
-		System.out.println("..........................................................");
+		System.out.println("..........................................................++");
 		System.out.println(listOfParsingTrees);
 		diplayAllTree();
 	}
